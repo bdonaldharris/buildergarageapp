@@ -944,7 +944,7 @@ th {
   margin-top: 0;
 }
 
-.tracks a,.updates a {
+.tracks a,.updates>a {
   display: flex;
   flex-direction: column;
   border-top: 1px solid var(--border);
