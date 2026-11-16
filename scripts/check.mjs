@@ -35,6 +35,14 @@ for (const [path, html] of pages) {
   const footerText = footer.replace(/<[^>]*>/g, '');
   assert.ok(!footerText.includes(sha.slice(0, 7)) && !footerText.includes(catalog.version), `Footer omits repeated provenance: ${path}`);
   const base = new URL(path.slice(dist.length), 'https://site.invalid');
+  for (const [tag, href] of html.matchAll(/<a\b[^>]*\bhref="([^"]*)"[^>]*>/g)) {
+    const url = new URL(decode(href), 'https://buildergarage.app');
+    if (['http:', 'https:'].includes(url.protocol) && url.origin !== 'https://buildergarage.app') {
+      assert.ok(tag.includes('target="_blank"') && tag.includes('rel="noopener noreferrer"'), `External link opens safely in a new tab in ${path}: ${href}`);
+    } else {
+      assert.ok(!tag.includes('target="_blank"'), `Internal and non-web links keep their navigation behavior in ${path}: ${href}`);
+    }
+  }
   for (const [, raw] of html.matchAll(/<(?:a|link|script|img)\b[^>]*\b(?:href|src)="([^"]+)"/g)) {
     const url = new URL(decode(raw), base);
     if (url.origin === base.origin) {

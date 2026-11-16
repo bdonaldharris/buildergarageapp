@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { basename, dirname, resolve } from 'node:path';
 import { frameworkSource } from './source.mjs';
 import { renderMarkdown } from './markdown.mjs';
+import { openExternalLinks } from './links.mjs';
 
 const root = resolve('.');
 const { source, repo, sha, version } = await frameworkSource(root);
@@ -58,7 +59,7 @@ function layout({ title, description, current='', depth='', body }) { return `<!
 const status = `<span class="status"><i></i> Foundation stage</span>`;
 const code = (value, title='') => `<div class="code">${title?`<b>${esc(title)}</b>`:''}<button class="copy" aria-label="Copy commands">Copy</button><pre>${esc(value)}</pre><span class="copy-live" aria-live="polite"></span></div>`;
 const pageHead = (title,lead,aside='') => `<section class="page-head"><div><h1>${title}</h1><p>${lead}</p></div>${aside}</section>`;
-function write(path, html) { const file = resolve(out, path, 'index.html'); mkdirSync(dirname(file), {recursive:true}); writeFileSync(file, html); }
+function write(path, html) { const file = resolve(out, path, 'index.html'); mkdirSync(dirname(file), {recursive:true}); writeFileSync(file, openExternalLinks(html)); }
 const card = a => `<article class="resource"><div><span class="tag">${a.type === 'skills' ? 'SKILL' : a.type === 'manuals' ? 'MANUAL' : 'CLI'}</span>${a.role!=='foundation'?` <span class="tag blue">${esc(a.role)}</span>`:''}</div><h3><a href="${a.url}">${esc(a.name)}</a></h3><p>${esc(a.summary)}</p><a href="${a.url}">View details →</a></article>`;
 const workflow = `<ol class="workflow"><li><b>01</b><h3>Discover</h3><p>Understand the system before changing it.</p></li><li><b>02</b><h3>Assess readiness</h3><p>Resolve material uncertainty deliberately.</p></li><li><b>03</b><h3>Implement</h3><p>Keep work scoped to the evidence.</p></li><li class="inspection"><b>04</b><h3>Inspect</h3><p>Independent review tests the real artifact.</p></li><li><b>05</b><h3>Ship</h3><p>Human authority remains with the maintainer.</p></li></ol>`;
 write('', layout({
