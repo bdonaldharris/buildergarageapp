@@ -5,6 +5,8 @@ import { resolve } from 'node:path';
 import { frameworkSource } from './source.mjs';
 
 const dist = resolve('dist');
+const vercel = JSON.parse(readFileSync(resolve('vercel.json'), 'utf8'));
+assert.ok(vercel.redirects.some(rule => rule.source === '/index.html' && rule.destination === '/' && rule.permanent === true), 'Legacy homepage URL permanently redirects to root');
 const { source, repo, sha } = await frameworkSource(resolve('.'));
 const required = ['index.html', 'library/index.html', 'get-started/index.html', '404.html', 'rss.xml', 'site.css', 'site.js', 'source.json'];
 for (const file of required) if (!existsSync(resolve(dist, file))) throw new Error(`Missing build output: ${file}`);
@@ -24,6 +26,7 @@ function collectPages(directory) {
 }
 collectPages(dist);
 for (const [path, html] of pages) {
+  assert.ok(html.includes('<a class="brand" href="/">'), `Brand links to root homepage: ${path}`);
   const githubCTA = html.match(/<a class="github"[^>]*>/)?.[0];
   assert.ok(githubCTA?.includes('target="_blank"') && githubCTA.includes('rel="noopener noreferrer"') && githubCTA.includes('aria-label="GitHub (opens in a new tab)"'), `GitHub CTA opens a safe, announced new tab: ${path}`);
   assert.ok(!/\bclass="[^"]*\beyebrow\b/.test(html), `Page omits eyebrow labels: ${path}`);
