@@ -1,0 +1,139 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Builder Garage guide: Your first contribution."><meta property="og:title" content="Your first contribution"><meta property="og:description" content="Builder Garage guide: Your first contribution."><meta property="og:image" content="../../assets/workshop.png"><title>Your first contribution · Builder Garage</title><link rel="stylesheet" href="../../assets/fonts/fonts.css"><link rel="stylesheet" href="../../site.css"></head><body><a class="skip" href="#main">Skip to content</a><header><a class="brand" href="../../index.html"><img src="../../assets/logo.png" alt="Builder Garage"></a><button class="menu" aria-label="Open navigation" aria-controls="site-nav" aria-expanded="false">Menu</button><nav id="site-nav" aria-label="Primary"><a  href="../../how-it-works/">How it works</a><a  href="../../get-started/">Get Started</a><a  href="../../library/">Library</a><a aria-current="page" href="../../learn/">Learn</a><a  href="../../updates/">Updates</a><a class="github" href="https://github.com/bdonaldharris/builder-garage">GitHub ↗</a></nav></header><main id="main"><article class="article"><a class="back" href="../">← Learn</a><p class="eyebrow">REPOSITORY GUIDE · CONTRIBUTING.md</p><h1>Your first contribution</h1><p><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/CONTRIBUTING.md">View source on GitHub ↗</a></p><div class="reading"><h2>Contributing to Builder Garage</h2>
+
+<p>Builder Garage is maintainer-led and community-contributed, and contributions are welcome from anyone. This document explains how a change moves from an idea to `main`.</p>
+
+<h3>Before you start</h3>
+
+<li>**Current state.** The repository contains the initial Go CLI foundation and its tests and build validation, alongside engineering skills, standards, [engineering principles](docs/principles.md), [project history](docs/history.md), and governance. See the [project status](README.md#project-status), [CLI development commands](README.md#develop-and-validate), and [architectural direction](docs/architecture.md).</li>
+<li>**Conduct.** Participation is governed by the [Code of Conduct](CODE_OF_CONDUCT.md).</li>
+<li>**Security.** Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md), never in a public issue.</li>
+<li>**License.** Builder Garage is released under the [MIT License](LICENSE). Contributions you submit are licensed under the same terms.</li>
+<li>**Authority.** [GOVERNANCE.md](GOVERNANCE.md) describes who decides what.</li>
+<li>**First contribution.** [Your first contribution](docs/first-contribution.md) walks a first-time contributor through one change, from finding an issue to an open pull request.</li>
+
+<h3>Two separate gates</h3>
+
+<p>Every substantive change passes two gates. They answer different questions at different times, and neither replaces the other.</p>
+
+<p>| | Independent engineering review | Maintainer approval |</p>
+<p>| --- | --- | --- |</p>
+<p>| **Question** | Is this change correct for its issue? | Does the project accept this change? |</p>
+<p>| **When** | After implementation, before the change is proposed as a pull request | On the pull request, before merge |</p>
+<p>| **Who** | A reviewer independent of the implementation; need not be a maintainer | A project maintainer |</p>
+<p>| **Recorded** | On the originating issue | As a GitHub approving review on the pull request, except for [pull requests authored by a sole maintainer](#pull-requests-authored-by-a-sole-maintainer) |</p>
+<p>| **Standard** | The review contract in [independent-implementation-review](skills/independent-implementation-review/SKILL.md) | Maintainer judgment under [GOVERNANCE.md](GOVERNANCE.md), plus required checks |</p>
+
+<p>Independent approval allows a change to be committed and proposed. It does not authorize merge. Maintainer approval does not stand in for a missing independent review.</p>
+
+<h3>How a substantive change proceeds</h3>
+
+<h4>1. Start from an issue</h4>
+
+<p>Substantive changes are issue-driven. [Open an issue](https://github.com/bdonaldharris/builder-garage/issues/new/choose) using the template that fits, or pick up an existing one.</p>
+
+<p>The issue is the durable record of the change: what is wanted, its acceptance criteria, its scope, and later its discovery findings and review results. Write acceptance criteria that a reviewer can check.</p>
+
+<p>The change-proposal template also has an optional **Intended outcome** field. Use it to describe what the result should be like for its user and, where useful, how it will be observed. It supplements the acceptance criteria and does not replace them.</p>
+
+<p>Before investing in implementation, give a maintainer the chance to respond on the issue. This avoids work on a change the project would not accept.</p>
+
+<p>#### Working on an existing issue</p>
+
+<p>An issue's assignee shows who is working on it, so that the same change is not implemented twice in parallel.</p>
+
+<li>**Requesting assignment.** If you are not a maintainer, ask to work on an existing issue in a comment on that issue, rather than assigning yourself. A maintainer assigns one primary owner.</li>
+<li>**Inactive assignments.** A maintainer may release an assignment that has become inactive, so that others can take up the issue.</li>
+<li>**What assignment means.** Assignment coordinates work. It does not approve a change or authorize its implementation, and it does not replace independent review or maintainer approval. Every substantive change still passes the [two separate gates](#two-separate-gates).</li>
+<li>**When the work ends.** A merged pull request that closes the issue ends the assignment. If a pull request is rejected or withdrawn while work remains, the work may be revised, and the issue unassigned, reassigned, or reopened, as appropriate.</li>
+
+<h4>2. Discover when warranted</h4>
+
+<p>When a change depends on questions that are not yet answered, investigate before implementing. Discovery investigates; it does not implement.</p>
+
+<p>**Document the findings in the originating issue**, so that the reasoning stays with the change. Discovery is not complete until they are recorded there.</p>
+
+<li>Procedure: [engineering-discovery-workflow](skills/engineering-discovery-workflow/SKILL.md)</li>
+<li>To judge whether a change is understood well enough to implement: [implementation-readiness-workflow](skills/implementation-readiness-workflow/SKILL.md)</li>
+
+<p>Not every change needs a separate discovery pass. Depth should be proportional to the change's risk and uncertainty.</p>
+
+<h4>3. Implement</h4>
+
+<p>Implement the change within the scope of its issue. **Do not commit yet**, by default. Under [commit-stage review](skills/application-implementation-workflow/SKILL.md#commit-stage-review), when the issue or the person running the implementation asks for it, commit the change and push it to a branch without opening a pull request.</p>
+
+<li>Procedure: [application-implementation-workflow](skills/application-implementation-workflow/SKILL.md)</li>
+
+<h4>4. Obtain independent review</h4>
+
+<p>Before the change is proposed as a pull request, including a draft, the complete change is reviewed by someone independent of its implementation. The implementer never reviews their own work.</p>
+
+<p>The change is reviewed in one of two forms:</p>
+
+<li>**Uncommitted, the default.** The reviewer inspects the implementer's working tree, so the reviewer must be able to reach it.</li>
+<li>**Committed, when asked for.** Under [commit-stage review](skills/application-implementation-workflow/SKILL.md#commit-stage-review), the implementer commits the change and pushes it to a branch without opening a pull request, for example in their fork. A reviewer who cannot reach the implementer's workspace reviews that commit. Use this path only when the issue or the person running the implementation asks for it.</li>
+
+<p>The review result is recorded on the originating issue. That issue record is the authoritative record of the independent review, and it governs whether the change may be proposed as a pull request. A review of the pull request, where one is required, supplements it and never replaces it.</p>
+
+<li>Procedure and review contract: [independent-implementation-review](skills/independent-implementation-review/SKILL.md)</li>
+
+<p>**Contributors outside the project.** You may hold this separation yourself. Run the implementation and the independent review as separate invocations, in separate execution contexts, in your own workspace, and post both records on the originating issue ([F1, F2](docs/responsibility-floor.md#rules)). This path is set by the [#98 D1 decision](https://github.com/bdonaldharris/builder-garage/issues/98#issuecomment-6873371683). [Contributor-held separation](crew/filling-roles.md#contributor-held-separation) explains it, and [Your first contribution](docs/first-contribution.md#4-implement-and-review-in-separate-execution-contexts) walks through it. If you cannot run separate execution contexts, for example because you work entirely by hand, ask on the issue before implementing. Someone outside your workspace may then review a pushed commit under commit-stage review, as described above.</p>
+
+<h4>5. Correct and re-review</h4>
+
+<p>If the review requires changes, correct them and return the complete corrected change for independent re-review. Addressing findings does not by itself restore approval; only the re-review does.</p>
+
+<h4>6. Commit, push, and open a pull request</h4>
+
+<p>Only after independent approval:</p>
+
+<p>1. commit the change that was approved, and nothing else;</p>
+<p>2. push it to a branch (in your fork, or in this repository if you have access);</p>
+<p>3. open a pull request against `main`, completing the [pull request template](.github/PULL_REQUEST_TEMPLATE.md) and linking the issue and its review record.</p>
+
+<p>Under commit-stage review, the approved change is already committed and pushed: skip steps 1 and 2, and open the pull request from the reviewed commit, or from one whose change is identical.</p>
+
+<p>If the change is modified after approval, it returns to independent review.</p>
+
+<li>Pull-request-stage procedure: [integration-pr-review](skills/integration-pr-review/SKILL.md)</li>
+
+<p>`main` is Builder Garage's integration destination. The canonical skill opens a pull request against the integration branch configured in [`.garage/config.yaml`](.garage/config.yaml), rather than its default, `staging`, which Builder Garage does not have. The skill's review, validation, and authorization requirements apply in full. Only the destination differs. See [GOVERNANCE.md](GOVERNANCE.md#changes-to-main).</p>
+
+<h4>7. Maintainer approval and merge</h4>
+
+<p>A maintainer reviews the pull request. It merges only after maintainer approval and after all required checks pass. No one pushes to `main` directly.</p>
+
+<p>Maintainer approval is normally recorded as a GitHub approving review on the pull request.</p>
+
+<p>Product intent is accepted at this stage. The Workflow Owner, currently the lead maintainer, is the human authority that accepts whether the result is what was intended for its user. When a change affects something a user sees or uses, and inspecting it is practical, the Workflow Owner inspects the result in that form before accepting it. Examples are the rendered page or a command's actual output. This is not a step every change must complete, and it does not change the independent review contract. [GOVERNANCE.md](GOVERNANCE.md#product-intent-acceptance) is the authority for this policy.</p>
+
+<p>#### Pull requests authored by a sole maintainer</p>
+
+<p>GitHub does not allow a pull request's author to approve it. While the lead maintainer is the only maintainer, a pull request the lead maintainer authored proceeds as follows:</p>
+
+<p>1. Independent engineering review remains mandatory and is completed first, as in steps 4 and 5.</p>
+<p>2. Maintainer acceptance remains a separate decision. After independent engineering approval, the lead maintainer may record explicit project acceptance in a comment on the pull request.</p>
+<p>3. That comment is documented project acceptance. It is not a GitHub approving review, and it does not satisfy a repository rule that requires one. The repository's rules must permit this workflow without weakening independent engineering verification; see [docs/repository-configuration.md](docs/repository-configuration.md#sole-maintainer).</p>
+
+<p>Once additional authorized maintainers are available, a maintainer-authored pull request receives approval from another maintainer under the normal process. [GOVERNANCE.md](GOVERNANCE.md#pull-requests-authored-by-a-sole-maintainer) is the authority for this policy.</p>
+
+<h3>Small corrections</h3>
+
+<p>The lifecycle above applies to substantive changes. A small correction that changes no meaning, such as a typo, a broken link, or formatting, may be proposed directly as a pull request without an issue. It still requires maintainer approval.</p>
+
+<p>A maintainer decides whether a change is substantive and may ask for an issue first.</p>
+
+<h3>Working with agents</h3>
+
+<p>The linked skills define how AI agents carry out this process, including the separation between the implementing agent and the independently invoked review agent. See [Agent identity and role boundaries](README.md#agent-identity-and-role-boundaries) and the skill shorthand in the [README](README.md#skill-shorthand).</p>
+
+<li>Implementation and independent review are separate agent invocations, in separate execution contexts such as separate sessions. An agent never reviews work it implemented.</li>
+<li>Output from automated review tools is optional input to independent review, not a substitute for it. Review authority comes from the reviewer's role and the recorded review, not from the tool used. Contributors are not required to enable a GitHub-hosted agent reviewer or any particular vendor integration.</li>
+
+<p>The same sequence applies when people do the work without agents: someone other than the implementer performs the independent review and records the result on the issue.</p>
+
+<h3>Changing skills and standards</h3>
+
+<p>The skills under [`skills/`](skills/) are the project's canonical engineering standards. Changing one is a substantive change and follows the full process above.</p>
+
+<p>Link to the canonical skill rather than restating its contents elsewhere. Summaries drift; the skill is the source of truth.</p>
+</div></article></main><footer><img src="../../assets/logo.png" alt="Builder Garage"><p>MIT License · © 2026 B Donald Harris</p><nav aria-label="Footer"><a href="https://github.com/bdonaldharris/builder-garage">GitHub</a><a href="../../contribute/">Contribute</a><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/CODE_OF_CONDUCT.md">Code of Conduct</a><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/SECURITY.md">Security</a><a href="../../rss.xml">RSS</a></nav></footer><script src="../../site.js"></script></body></html>
