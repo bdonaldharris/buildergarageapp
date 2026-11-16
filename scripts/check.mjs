@@ -24,6 +24,8 @@ function collectPages(directory) {
 }
 collectPages(dist);
 for (const [path, html] of pages) {
+  const githubCTA = html.match(/<a class="github"[^>]*>/)?.[0];
+  assert.ok(githubCTA?.includes('target="_blank"') && githubCTA.includes('rel="noopener noreferrer"') && githubCTA.includes('aria-label="GitHub (opens in a new tab)"'), `GitHub CTA opens a safe, announced new tab: ${path}`);
   assert.ok(!/\bclass="[^"]*\beyebrow\b/.test(html), `Page omits eyebrow labels: ${path}`);
   const footer = html.match(/<footer>[\s\S]*?<\/footer>/)?.[0];
   assert.ok(footer?.includes('>Source details</a>'), `Footer links to source details: ${path}`);
