@@ -1,100 +1,262 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Builder Garage guide: Project configuration."><meta property="og:title" content="Project configuration"><meta property="og:description" content="Builder Garage guide: Project configuration."><meta property="og:image" content="../../assets/workshop.png"><title>Project configuration · Builder Garage</title><link rel="stylesheet" href="../../assets/fonts/fonts.css"><link rel="stylesheet" href="../../site.css"></head><body><a class="skip" href="#main">Skip to content</a><header><a class="brand" href="../../index.html"><img src="../../assets/logo.png" alt="Builder Garage"></a><button class="menu" aria-label="Open navigation" aria-controls="site-nav" aria-expanded="false">Menu</button><nav id="site-nav" aria-label="Primary"><a  href="../../how-it-works/">How it works</a><a  href="../../get-started/">Get Started</a><a  href="../../library/">Library</a><a aria-current="page" href="../../learn/">Learn</a><a  href="../../updates/">Updates</a><a class="github" href="https://github.com/bdonaldharris/builder-garage">GitHub ↗</a></nav></header><main id="main"><article class="article"><a class="back" href="../">← Learn</a><p class="eyebrow">REPOSITORY GUIDE · docs/repository-configuration.md</p><h1>Project configuration</h1><p><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/repository-configuration.md">View source on GitHub ↗</a></p><div class="reading"><h2>Repository Configuration: Observed State and Recommendations</h2>
-
-<p>**Observed:** 2026-11-14 (UTC), read-only, through the GitHub API with repository admin access.</p>
-
-<p>This is a point-in-time record. It compares the repository's settings with the rules in [GOVERNANCE.md](../GOVERNANCE.md) and recommends changes. **No repository setting was modified in producing it.** Verify the current state before acting on it. The previous observation, from 2026-11-12, remains in Git history.</p>
-
-<h3>Observed state</h3>
-
-<p>| Area | Observed |</p>
-<p>| --- | --- |</p>
-<p>| Repository | `bdonaldharris/builder-garage`, public, default branch `main`. Renamed from `agentic-builder-engineering-system`; the old URL redirects. The description is set. No topics are set. |</p>
-<p>| Collaborators | One: `bdonaldharris` (admin). |</p>
-<p>| Rulesets | One: **Protect main**. Active, defined on the repository, targeting the default branch. No bypass actors. |</p>
-<p>| **Protect main** rules | **Restrict deletions.**&lt;br&gt;**Block force pushes.**&lt;br&gt;**Require a pull request before merging:** 0 required approving reviews; stale approvals are not dismissed when new commits are pushed; code-owner review is not required; approval of the most recent push is not required; review threads must be resolved; extra approval is required for unattributed changes; merge commits, squash, and rebase are allowed.&lt;br&gt;**Require status checks to pass:** `Format, vet, build, cross-compile`, `Test (ubuntu-latest)`, `Test (macos-latest)`, and `Test (windows-latest)`. Branches are not required to be up to date before merging. The checks are also enforced when a branch is created. |</p>
-<p>| Branch protection on `main` | None. The ruleset above is the only protection. |</p>
-<p>| GitHub Actions workflows | One repository workflow, CI ([`ci.yml`](../.github/workflows/ci.yml)), on pull requests. Besides the four required checks, it runs `Source installer (ubuntu-latest)` and `Source installer (macos-latest)`, which are not required. GitHub also lists two dynamic workflows of its own, Copilot cloud agent and Dependency Graph. |</p>
-<p>| GitHub Actions policy | Actions enabled. All actions and reusable workflows are allowed. SHA pinning is not required. The default workflow token is read-only, and workflows cannot approve pull requests. |</p>
-<p>| Merge settings | Merge commits, squash, and rebase all allowed. Auto-merge off. Head branches are deleted on merge. |</p>
-<p>| Private vulnerability reporting | Enabled. |</p>
-<p>| Secret scanning and push protection | Both enabled. Non-provider patterns and validity checks are disabled. |</p>
-<p>| Dependabot | Alerts enabled. Security updates disabled. The repository has Go module dependencies (`go.mod`): `github.com/spf13/cobra` and `go.yaml.in/yaml/v3`, and indirectly `github.com/spf13/pflag` and `github.com/inconshreveable/mousetrap`. |</p>
-<p>| Issues / Discussions / Wiki / Projects | Enabled / disabled / enabled / enabled. The wiki is the community wiki ([#70](https://github.com/bdonaldharris/builder-garage/issues/70)). |</p>
-<p>| Labels | GitHub defaults, plus `accessibility`, `chore`, `discovery`, `extension`, `hotfix`, `plugin`, and the area labels `area:cli`, `area:configuration`, `area:crew`, `area:inspection`, `area:manuals`, `area:shipping`, and `area:workbench`. |</p>
-<p>| `CODEOWNERS` | None. |</p>
-<p>| Community profile | Health 100%. Detected: README, license, contributing guide, code of conduct, and pull request template. The profile reports no issue template, although `.github/ISSUE_TEMPLATE/` holds issue forms. |</p>
-<p>| Recent history | The ten most recent commits on `main` (`70aab17` back to `2cff999`) all belong to merged pull requests, #71 through #79. |</p>
-<p>| Remote branches | `main` only. |</p>
-
-<h3>Gaps against governance</h3>
-
-<p>The repository's settings now enforce these [GOVERNANCE.md](../GOVERNANCE.md) rules:</p>
-
-<li>**No direct pushes to `main`.** The **Protect main** ruleset requires a pull request, blocks force pushes and deletion, and has no bypass actors ([Changes to `main`](../GOVERNANCE.md#changes-to-main)).</li>
-<li>**All required checks pass before merge.** The ruleset requires four checks. Which checks should be required is still open; see [Required checks](#required-checks).</li>
-<li>**Private vulnerability reporting**, the preferred channel in [SECURITY.md](../SECURITY.md), is available.</li>
-
-<p>These rules are not enforced by settings:</p>
-
-<p>| Governance rule | Enforced today? | Recommendation |</p>
-<p>| --- | --- | --- |</p>
-<p>| Maintainer approval before merge | No. The ruleset requires 0 approving reviews, so that the sole maintainer's own pull requests can merge. Approval of other contributors' pull requests is required by governance, not by settings. See [Sole maintainer](#sole-maintainer). | Once a second maintainer exists, require at least one approving review and dismiss stale approvals when new commits are pushed. |</p>
-<p>| Independent engineering review before the pull request | Not enforceable by repository settings. | No setting applies. The review is recorded on the originating issue, the pull request template asks for a link to it, and maintainers confirm it when approving or recording acceptance. |</p>
-
-<h3>Recommended changes</h3>
-
-<h4>Required for the documented governance to hold</h4>
-
-<p>None. The ruleset and private vulnerability reporting that the previous observation required are in place.</p>
-
-<h4>Recommended</h4>
-
-<p>1. Set repository topics that match the identity in the [README](../README.md). The description is already set.</p>
-<p>2. Update local clones to the current URL: `git remote set-url origin https://github.com/bdonaldharris/builder-garage.git`. This is a per-clone action, not a repository setting.</p>
-
-<p>Whether to enable Dependabot security updates is an open decision; see [Dependabot security updates](#dependabot-security-updates).</p>
-
-<h4>Optional</h4>
-
-<p>3. Apply the existing `discovery` label in the Discovery request template ([`discovery.yml`](../.github/ISSUE_TEMPLATE/discovery.yml)). The template applies no label today.</p>
-<p>4. Add `CODEOWNERS` once there is more than one maintainer.</p>
-
-<h3>Sole maintainer</h3>
-
-<p>GitHub does not allow the author of a pull request to approve it. While the lead maintainer is the only maintainer, a ruleset that requires one approving review, with no exception, would block every pull request the lead maintainer authors.</p>
-
-<p>[GOVERNANCE.md](../GOVERNANCE.md#pull-requests-authored-by-a-sole-maintainer) defines how those pull requests proceed: independent engineering approval remains mandatory, and the lead maintainer may then record explicit project acceptance in a comment on the pull request. That comment is documented project acceptance. It is not a GitHub approving review, and it does not satisfy a branch protection rule or ruleset that requires one. The repository's rules must therefore permit this workflow.</p>
-
-<p>Two configurations permit it:</p>
-
-<li>**Require pull requests with zero required approvals** until a second maintainer exists. Approving reviews on other contributors' pull requests remain required by governance but are not enforced by settings.</li>
-<li>**Require one approving review and add the lead maintainer to the ruleset's bypass list in pull-request-only mode.** Changes still reach `main` only through pull requests, and the lead maintainer can merge a pull request they authored without an approving review. The bypass is not limited to pull requests the lead maintainer authored, so the approving review on other contributors' pull requests still depends on governance being followed.</li>
-
-<p>Both keep &quot;no direct pushes&quot; enforced. Under either, project acceptance of the lead maintainer's own pull requests is recorded by comment and is not enforced by settings; GitHub cannot require a comment before merge.</p>
-
-<p>Neither weakens independent engineering verification. No repository setting enforces that review under either configuration. It is recorded on the originating issue, linked from the pull request, and confirmed before acceptance is recorded.</p>
-
-<p>**In effect, as observed:** the first configuration. **Protect main** requires a pull request with zero approving reviews and has no bypass actors. No durable record of the decision to use it has been found, so the choice is listed under [Unresolved decisions](#sole-maintainer-ruleset-configuration).</p>
-
-<p>Once a second authorized maintainer is available, maintainer-authored pull requests receive approval from another maintainer under the normal process. The ruleset can then require at least one approving review without a bypass.</p>
-
-<h3>Unresolved decisions</h3>
-
-<p>Each decision below belongs to the lead maintainer. Each one stays here, with its observed setting, until the decision is recorded on [#77](https://github.com/bdonaldharris/builder-garage/issues/77) or linked from it.</p>
-
-<h4>Sole-maintainer ruleset configuration</h4>
-
-<p>Which of the two configurations under [Sole maintainer](#sole-maintainer) to use is not recorded. **Observed:** the first, a pull request with zero required approving reviews and no bypass actors.</p>
-
-<h4>Required checks</h4>
-
-<p>Which checks are required is not recorded. **Observed:** four required checks, `Format, vet, build, cross-compile`, `Test (ubuntu-latest)`, `Test (macos-latest)`, and `Test (windows-latest)`, with no up-to-date requirement. Also open: whether `Source installer (ubuntu-latest)` and `Source installer (macos-latest)`, which run on every pull request, become required.</p>
-
-<h4>Dependabot security updates</h4>
-
-<p>Whether to enable Dependabot security updates, now that the repository has Go module dependencies, is not recorded. **Observed:** security updates disabled, alerts enabled.</p>
-
-<h4>Actions policy</h4>
-
-<p>Whether to keep the current GitHub Actions policy or restrict it is not recorded. **Observed:** all actions and reusable workflows allowed, and SHA pinning not required.</p>
-</div></article></main><footer><img src="../../assets/logo.png" alt="Builder Garage"><p>MIT License · © 2026 B Donald Harris</p><nav aria-label="Footer"><a href="https://github.com/bdonaldharris/builder-garage">GitHub</a><a href="../../contribute/">Contribute</a><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/CODE_OF_CONDUCT.md">Code of Conduct</a><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/SECURITY.md">Security</a><a href="../../rss.xml">RSS</a></nav></footer><script src="../../site.js"></script></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Builder Garage guide: Project configuration."><meta property="og:title" content="Project configuration"><meta property="og:description" content="Builder Garage guide: Project configuration."><meta property="og:image" content="../../assets/workshop.png"><title>Project configuration · Builder Garage</title><link rel="preload" href="../../assets/fonts/archivo-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="../../assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="../../assets/fonts/fonts.css"><link rel="stylesheet" href="../../site.css"></head><body><a class="skip" href="#main">Skip to content</a><header><a class="brand" href="../../index.html"><img src="../../assets/logo.png" alt="Builder Garage"></a><button class="menu" aria-label="Open navigation" aria-controls="site-nav" aria-expanded="false">Menu</button><nav id="site-nav" aria-label="Primary"><a  href="../../how-it-works/">How it works</a><a  href="../../get-started/">Get Started</a><a  href="../../library/">Library</a><a aria-current="page" href="../../learn/">Learn</a><a  href="../../updates/">Updates</a><a class="github" href="https://github.com/bdonaldharris/builder-garage">GitHub ↗</a></nav></header><main id="main"><article class="article"><a class="back" href="../">← Learn</a><h1>Project configuration</h1><p><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/configuration.md">View source ↗</a></p><div class="reading"><h1 id="project-configuration">Project Configuration</h1>
+<p><strong>Schema version:</strong> 2
+<strong>Status:</strong> Canonical. Defined under <a href="https://github.com/bdonaldharris/builder-garage/issues/35">#35</a>, following the <a href="https://github.com/bdonaldharris/builder-garage/issues/35#issuecomment-6842152164">#35 maintainer decision</a> and the <a href="https://github.com/bdonaldharris/builder-garage/issues/35#issuecomment-6839187808">#33/#35 decision</a>.</p>
+<p>A project&#39;s Builder Garage configuration lives in one file, <code>.garage/config.yaml</code>, at the project root. It is the sole canonical source of the project&#39;s configured choices. It is tracked with the project and changes through the project&#39;s normal review process.</p>
+<p>The file has two sections:</p>
+<ul>
+<li><strong><code>project</code></strong> holds the project&#39;s values at the extension points that the <a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/extension-points.md">extension-point registry</a> declares. Nothing else in the responsibility model is configurable, and no value can weaken the <a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/responsibility-floor.md">responsibility floor</a>.</li>
+<li><strong><code>tooling</code></strong> holds Garage tooling settings, documented in <a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/tooling-configuration.md">Tooling configuration</a>. Tooling settings are outside the registry and grant no workflow authority.</li>
+</ul>
+<p>The canonical <a href="https://github.com/bdonaldharris/builder-garage/tree/db2fcaca6e315cd2a2732a963b6253edd831926e/skills/">skills</a> read this file, as described in <a href="#how-the-skills-read-the-configuration">How the skills read the configuration</a>.</p>
+<h2 id="the-project-section">The <code>project</code> section</h2>
+<p>Each key carries one extension point. The registry defines its allowed values, default, and constraint; this table gives only the YAML shape.</p>
+<div class="table-scroll" role="region" aria-label="Scrollable table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Point</th>
+<th>Shape</th>
+<th>When omitted</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>integration_branch</code></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/extension-points.md#e1-integration-branch">E1</a></td>
+<td>A branch name</td>
+<td>The default, <code>staging</code>, applies</td>
+</tr>
+<tr>
+<td><code>pr_review_triggers</code></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/extension-points.md#e2-additional-pr-review-triggers">E2</a></td>
+<td>A list of <code>{name, applies_when}</code></td>
+<td>Only the two minimum triggers apply</td>
+</tr>
+<tr>
+<td><code>automated_reviewer</code></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/extension-points.md#e3-automated-reviewer">E3</a></td>
+<td><code>{name, request}</code>: the reviewer and how its review is requested</td>
+<td>No automated reviewer</td>
+</tr>
+<tr>
+<td><code>small_corrections</code></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/extension-points.md#e4-small-correction-entry-path">E4</a></td>
+<td><code>{enabled, without_issue}</code></td>
+<td>Disabled</td>
+</tr>
+<tr>
+<td><code>discovery</code></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/extension-points.md#e5-discovery-applicability">E5</a></td>
+<td><code>{mode}</code>, where <code>mode</code> is <code>implementer-judgment</code> or <code>triggers</code>; with <code>triggers</code>, also a non-empty <code>triggers</code> list of <code>{name, applies_when}</code></td>
+<td><strong>Required.</strong> There is no default.</td>
+</tr>
+<tr>
+<td><code>release_conditions</code></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/extension-points.md#e6-release-and-evidence-conditions">E6</a></td>
+<td>A list of <code>{name, applies_when, required_evidence}</code></td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>suggestions_backlog</code></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/extension-points.md#e7-improvement-suggestions-backlog">E7</a></td>
+<td>An issue reference such as <code>&quot;#24&quot;</code>, or <code>none</code></td>
+<td>The repository&#39;s <code>Application Improvement Suggestions</code> issue</td>
+</tr>
+<tr>
+<td><code>authorities</code></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/extension-points.md#e8-human-authorities">E8</a></td>
+<td><code>workflow_owner</code>, <code>change_acceptor</code>, <code>product_intent_acceptor</code>, and <code>small_correction_classifier</code>, each <code>{role, members}</code>; <code>members</code> is optional</td>
+<td><strong><code>workflow_owner</code>, <code>change_acceptor</code>, and <code>product_intent_acceptor</code> are required.</strong> <code>small_correction_classifier</code> is required when, and allowed only when, small corrections are enabled.</td>
+</tr>
+<tr>
+<td><code>user_facing_inspection</code></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/extension-points.md#e9-user-facing-inspection-trigger">E9</a></td>
+<td><code>{additional_conditions}</code>: a list of project conditions added to the canonical trigger</td>
+<td>The canonical trigger alone</td>
+</tr>
+<tr>
+<td><code>guidance</code></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/extension-points.md#e10-manuals">E10</a></td>
+<td><code>{manuals}</code>: a list of <code>{name, version}</code>. A <code>conditional</code> list is refused: conditional stack or provider guidance is not configurable (<a href="https://github.com/bdonaldharris/builder-garage/issues/56#issuecomment-6859392233">#56 decision</a>)</td>
+<td>No manual; conditional guidance applies only under its own condition</td>
+</tr>
+</tbody></table>
+</div>
+<p>An omitted key means the canonical default applies. A key that is present is the project&#39;s explicit choice, even when it equals the default.</p>
+<h2 id="initialization-and-upgrade-garage-init">Initialization and upgrade: <code>garage init</code></h2>
+<p><code>garage init</code> creates the configuration, or upgrades an existing one in place. It never writes an invalid or incomplete configuration, and it never discards a configured value.</p>
+<ul>
+<li><p><strong>Required values.</strong> Without an interactive terminal, every required value must be given as a flag. If one is missing, <code>init</code> fails and writes nothing.</p>
+</li>
+<li><p><strong>Guided setup.</strong> When both input and output are a terminal, <code>init</code> guides the person running it (<a href="https://github.com/bdonaldharris/builder-garage/issues/54#issuecomment-6857444538">#54 decision</a>):</p>
+<ul>
+<li><strong>A new configuration.</strong> <code>init</code> walks through every choice that no flag supplies: the integration branch, the human responsibilities, the policies, manuals, and skill targets. Conditional stack or provider guidance is not configurable, so it is not offered. It uses plain language and numbered menus, shows each default, and does not show extension-point identifiers or flag syntax. A choice left at its default is not written, so the default applies.</li>
+<li><strong>Responsibilities.</strong> Each human responsibility is explained where it is chosen. An authority already named can be reused without retyping it. Placeholder answers, such as <code>ROLE</code>, <code>TBD</code>, or <code>&lt;role&gt;</code>, are rejected.</li>
+<li><strong>Repository branch.</strong> When the repository&#39;s <code>origin/HEAD</code> names a default branch, it is offered as the integration branch.</li>
+<li><strong>Skill targets.</strong> These are offered as a pick list. Each chosen target is written with the version and date its paths were confirmed with.</li>
+<li><strong>An upgrade.</strong> Upgrading an existing configuration asks only for missing required values. It never turns a default into an explicit value.</li>
+<li><strong>Confirmation.</strong> Before any interactive write, <code>init</code> shows a readable summary, including the defaults that apply, and writes only after an explicit yes. Any other answer writes nothing.</li>
+</ul>
+<p>Menu answers produce exactly the values the equivalent flags produce.</p>
+</li>
+<li><p><strong>Flags.</strong> Each extension point and tooling setting has a flag; <code>garage init --help</code> lists them and their value formats.</p>
+</li>
+<li><p><strong>A new file</strong> is written only after the complete configuration validates.</p>
+</li>
+<li><p><strong>An existing file</strong> is upgraded in place:</p>
+<ul>
+<li>every existing value and comment is kept;</li>
+<li>only missing or newly required settings are added;</li>
+<li>a schema version 1 file, which records only <code>schema_version: 1</code>, is migrated to version 2;</li>
+<li>the file is replaced atomically, through a temporary file in the same directory;</li>
+<li>immediately before the replacement, <code>init</code> checks that the file is still the one it read, with the same content. If it changed while <code>init</code> was running, for example while waiting for an answer, <code>init</code> stops without writing and asks to be run again, so a concurrent change is never overwritten.</li>
+</ul>
+</li>
+<li><p><strong>No overwrite.</strong> A flag that conflicts with an already configured value is an error. Change configured values with the <a href="#reading-and-changing-settings-garage-config">configuration commands</a> or by editing the file, through the project&#39;s normal review process, not with <code>init</code>. There is no <code>--force</code>.</p>
+</li>
+<li><p><strong>Invalid or ambiguous files.</strong> If the existing file is not valid YAML, does not match the schema, has an unsupported schema version, is a version 1 file with other keys, or holds an invalid value, <code>init</code> stops without changing it and explains the correction required.</p>
+</li>
+<li><p><strong>A symbolic link or non-regular file</strong> at <code>.garage</code> or <code>.garage/config.yaml</code> is refused.</p>
+</li>
+</ul>
+<h2 id="validation-garage-config-validate">Validation: <code>garage config validate</code></h2>
+<p><code>garage config validate</code> is read-only. It reads <code>.garage/config.yaml</code> in the current directory, strictly decodes it, and checks every declared, mechanically checkable value. It reports all problems together and exits with an error when the file is missing, unreadable, or invalid. On success it prints, for each extension point, the configured value or the default that applies.</p>
+<p>Builder Garage&#39;s CI runs it against Builder Garage&#39;s own configuration on every pull request.</p>
+<div class="table-scroll" role="region" aria-label="Scrollable table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Checked</th>
+<th>Not checked or certified</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>The schema: known keys only, correct types, one YAML document, a supported schema version</td>
+<td>Whether a configured authority is human. That is a governance responsibility and a durable maintainer assertion.</td>
+</tr>
+<tr>
+<td>That every required value is present</td>
+<td>Agent sessions, or whether agents worked independently</td>
+</tr>
+<tr>
+<td>Each value&#39;s form: branch-name rules, non-empty and unique names, a reviewer name that is not a placeholder (guided setup applies the same rule), issue-reference form, the discovery mode and its triggers, the E4/E8 classifier dependency</td>
+<td>Any workflow state. Validation never authorizes work or advances a workflow.</td>
+</tr>
+<tr>
+<td>That each adopted manual is one this <code>garage</code> binary carries (<a href="https://github.com/bdonaldharris/builder-garage/issues/60#issuecomment-6860594142">#60 decision</a>). A known manual at another version is valid; the output reports the version the binary delivers.</td>
+<td>Whether a configured branch or issue exists</td>
+</tr>
+<tr>
+<td>Tooling values, as described in <a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/tooling-configuration.md">Tooling configuration</a></td>
+<td></td>
+</tr>
+</tbody></table>
+</div>
+<h2 id="reading-and-changing-settings-garage-config">Reading and changing settings: <code>garage config</code></h2>
+<p>Six commands read and change one setting at a time (<a href="https://github.com/bdonaldharris/builder-garage/issues/64#issuecomment-6866391233">#64 decision</a>, <a href="https://github.com/bdonaldharris/builder-garage/issues/67">#67</a>). They are a convenience and automation surface over the same configuration model; editing the file by hand remains supported.</p>
+<div class="table-scroll" role="region" aria-label="Scrollable table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>garage config show</code></td>
+<td>Shows every setting in plain language, with its name, and the default that applies where none is set, marked &quot;(default)&quot;</td>
+</tr>
+<tr>
+<td><code>garage config get SETTING</code></td>
+<td>Prints one value, in the format its <code>init</code> flag takes; a list prints one item per line, and a default is marked &quot;(default)&quot;</td>
+</tr>
+<tr>
+<td><code>garage config set SETTING VALUE</code></td>
+<td>Sets a setting that holds one value</td>
+</tr>
+<tr>
+<td><code>garage config unset SETTING...</code></td>
+<td>Removes settings, so that their defaults apply. Unsetting a list removes all its items.</td>
+</tr>
+<tr>
+<td><code>garage config add SETTING VALUE</code></td>
+<td>Adds one item to a list setting</td>
+</tr>
+<tr>
+<td><code>garage config remove SETTING NAME</code></td>
+<td>Removes one list item, identified by its name, its harness for a skill target, or its exact text for an inspection condition</td>
+</tr>
+</tbody></table>
+</div>
+<ul>
+<li><p><strong>Names and formats.</strong> A setting&#39;s name is its <code>init</code> flag&#39;s name, such as <code>integration-branch</code>, <code>workflow-owner</code>, <code>manual</code>, or <code>skill-target</code>, and its value takes that flag&#39;s format. Each command&#39;s <code>--help</code> lists its settings. The commands&#39; output and help use plain language, never extension-point identifiers. Refusals name settings, not YAML keys.</p>
+</li>
+<li><p><strong>Versions.</strong> <code>add manual NAME</code> adopts the version of the manual this <code>garage</code> binary delivers. <code>add skill-target HARNESS</code> writes the version and date that harness&#39;s skill paths were confirmed with. The full forms, <code>NAME@VERSION</code> and <code>HARNESS@VERSION@YYYY-MM-DD</code>, are also accepted.</p>
+</li>
+<li><p><strong>Settings that depend on each other</strong> change in one command:</p>
+<ul>
+<li><code>set automated-reviewer NAME --automated-reviewer-request TEXT</code></li>
+<li><code>set small-corrections enabled --small-correction-classifier ROLE [--small-corrections-without-issue]</code></li>
+<li><code>set discovery triggers --discovery-trigger &quot;NAME|WHEN&quot; ...</code>, where the triggers given replace the configured ones</li>
+<li><code>unset small-corrections small-correction-classifier</code>, which removes several settings together</li>
+</ul>
+<p>Setting <code>discovery</code> to <code>implementer-judgment</code> removes the discovery triggers, and disabling small corrections removes <code>small-corrections-without-issue</code>, because each applies only to the other choice. The change shown before writing lists what is removed. Any other change that would leave the configuration invalid is refused, with the reason; it is never repaired silently.</p>
+</li>
+<li><p><strong>Required settings.</strong> <code>discovery</code>, <code>workflow-owner</code>, <code>change-acceptor</code>, and <code>product-intent-acceptor</code> cannot be unset; set a new value instead.</p>
+</li>
+<li><p><strong>One write pipeline.</strong> Every change follows <code>init</code>&#39;s path:</p>
+<ol>
+<li>take a snapshot of the file and decode it strictly;</li>
+<li>refuse an invalid file, or one at another schema version, which <code>garage init</code> upgrades;</li>
+<li>apply the change to the complete configuration and validate the result;</li>
+<li>edit the YAML, and check that the result decodes to exactly the validated configuration;</li>
+<li>confirm;</li>
+<li>replace the file atomically, after checking that it is still the file that was read.</li>
+</ol>
+<p>An invalid configuration is never written, and a concurrent change is never overwritten.</p>
+</li>
+<li><p><strong>Confirmation.</strong> In an interactive terminal, the command shows the exact change and writes only after an explicit yes. Outside one, a change fails and writes nothing unless <code>--yes</code> is given, so a script never changes the configuration silently.</p>
+</li>
+<li><p><strong>Comments.</strong> Comments on untouched settings are kept, and a changed value keeps its key&#39;s comments. A removed setting or list item loses its own comments; the command lists them before writing.</p>
+</li>
+<li><p><strong>Invalid files.</strong> Every change refuses an invalid configuration, with one exception. <code>unset conditional-guidance</code> alone removes the retired <code>guidance.conditional</code> setting, but only when the result validates. It is not a way to change an otherwise invalid file.</p>
+</li>
+<li><p><strong>Authority.</strong> The commands change only <code>.garage/config.yaml</code>. They never commit, push, or open pull requests, and they authorize nothing. A configured value still changes through the project&#39;s normal review process.</p>
+</li>
+</ul>
+<h2 id="absent-and-invalid-configuration">Absent and invalid configuration</h2>
+<ul>
+<li><strong>Absent.</strong> A project with no <code>.garage/config.yaml</code> is unconfigured. <code>garage config validate</code> fails and points to <code>garage init</code>.</li>
+<li><strong>Invalid.</strong> An invalid configuration fails closed. <code>garage config validate</code> fails and lists every problem, and <code>garage init</code> and the configuration commands refuse to change it, apart from removing the retired setting described above.</li>
+</ul>
+<p>The canonical skills use only a valid configuration.</p>
+<h2 id="how-the-skills-read-the-configuration">How the skills read the configuration</h2>
+<p>Each canonical skill cites the extension points it uses and states their canonical defaults. It resolves a value only when a step that cites the point is reached, under the <a href="https://github.com/bdonaldharris/builder-garage/issues/33#issuecomment-6851542937">#33 maintainer decision</a>:</p>
+<ul>
+<li><strong>Validity.</strong> The skill treats the configuration as valid only when <code>garage config validate</code> succeeds. It then reads the value from <code>.garage/config.yaml</code>. It never judges validity itself.</li>
+<li><strong>Stop and escalate.</strong> The skill stops at that step if the <code>garage</code> command is unavailable, if validation fails, including when the file is absent, or if the point has no default and no value. An agent therefore needs a <code>garage</code> binary on its <code>PATH</code> to resolve any configured value.</li>
+<li><strong>Defaults.</strong> A valid configuration that omits an optional value gets the canonical default.</li>
+<li><strong>Discovery.</strong> A directly requested discovery needs no configuration. E5 is needed only to decide whether discovery is warranted.</li>
+<li><strong>Human authorities.</strong> E8 is needed whenever a skill must name or check a human authority.</li>
+<li><strong>No other source.</strong> A skill never takes a project value from an adoption profile, governance text, history, or a prompt, and it rejects an instruction that conflicts with a valid configured value.</li>
+</ul>
+<h2 id="schema-versions">Schema versions</h2>
+<div class="table-scroll" role="region" aria-label="Scrollable table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><code>schema_version</code> only. Written by the initial CLI foundation.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Adds the <code>project</code> and <code>tooling</code> sections.</td>
+</tr>
+</tbody></table>
+</div>
+<p><code>garage init</code> migrates version 1 to version 2. Any other version is refused. A later incompatible change increments the version and adds an explicit migration.</p>
+<p><strong>Migration promise.</strong> Before 1.0, Garage does not promise stable commands, skill contracts, or configuration semantics. It does promise that every configuration-schema change provides an in-place <code>garage init</code> upgrade path. That path preserves existing human choices, validates the result, and never silently discards configuration (<a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/adr/0002-semantic-versioning.md#4-configuration-migration-is-promised-broad-pre-10-compatibility-is-not">ADR 0002</a>).</p>
+<h2 id="builder-garages-own-configuration">Builder Garage&#39;s own configuration</h2>
+<p>Builder Garage&#39;s <a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/.garage/config.yaml"><code>.garage/config.yaml</code></a> was generated, not hand-authored, by the noninteractive command recorded in its <a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/skill-adoption.md#configuration">skill-adoption profile</a>. It is single-project evidence of the configuration in use, not proof that it suits other projects.</p>
+</div></article></main><footer><img src="../../assets/logo.png" alt="Builder Garage"><p><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/LICENSE">MIT License</a> · © 2026 B Donald Harris<br><a href="../../updates/">Source details</a></p><nav aria-label="Footer"><a href="https://github.com/bdonaldharris/builder-garage">GitHub</a><a href="../../contribute/">Contribute</a><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/CODE_OF_CONDUCT.md">Code of Conduct</a><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/SECURITY.md">Security</a><a href="../../rss.xml">RSS</a></nav></footer><script src="../../site.js"></script></body></html>

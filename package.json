@@ -4,6 +4,12 @@
   "version": "0.1.0",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "check": "node scripts/build.mjs && node scripts/check.mjs"
+    "check": "node --test scripts/*.test.mjs && node scripts/build.mjs && node scripts/check.mjs"
+  },
+  "dependencies": {
+    "marked": "^18.2.1"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

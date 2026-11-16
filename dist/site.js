@@ -1,1 +1,102 @@
-(() => { const menu=document.querySelector('.menu'), nav=document.querySelector('header nav'); if(menu&&nav){menu.addEventListener('click',()=>{const on=nav.classList.toggle('open');menu.setAttribute('aria-expanded',on);menu.textContent=on?'Close':'Menu';document.body.style.overflow=on?'hidden':''});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&nav.classList.contains('open'))menu.click()})}document.querySelectorAll('.copy').forEach(button=>button.addEventListener('click',async()=>{const pre=button.parentElement.querySelector('pre');const value=pre.textContent.split('\n').filter(line=>!line.trim().startsWith('#')).map(line=>line.replace(/^\$\s?/, '')).join('\n');try{await navigator.clipboard.writeText(value);button.textContent='Copied';button.parentElement.querySelector('.copy-live').textContent='Commands copied';setTimeout(()=>button.textContent='Copy',2000)}catch{const range=document.createRange();range.selectNodeContents(pre);getSelection().removeAllRanges();getSelection().addRange(range)}}));document.querySelectorAll('.install-tabs').forEach(group=>{const tabs=[...group.querySelectorAll('[role=tab]')], panels=[...group.querySelectorAll('[role=tabpanel]')];tabs.forEach((tab,i)=>tab.addEventListener('click',()=>{tabs.forEach((t,j)=>t.setAttribute('aria-selected',i===j));panels.forEach((p,j)=>p.hidden=i!==j)}));group.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight'].includes(e.key)){const i=tabs.indexOf(document.activeElement);tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length].focus();e.preventDefault()}})});const search=document.querySelector('#library-search'), rows=[...document.querySelectorAll('.resource-row')], count=document.querySelector('#result-count'), filters=[...document.querySelectorAll('.filters input')], tabs=[...document.querySelectorAll('.tabs button')], empty=document.querySelector('.empty');let type='all';function apply(){const q=(search?.value||'').toLowerCase(), roles=filters.filter(x=>x.checked).map(x=>x.value);let n=0;rows.forEach(row=>{const match=(!q||row.textContent.toLowerCase().includes(q))&&(type==='all'||row.href.includes('/'+type+'/'))&&(!roles.length||roles.some(r=>row.textContent.toLowerCase().includes(r)));row.hidden=!match;if(match)n++});if(count)count.textContent=`${n} ${n===1?'part':'parts'}`;if(empty)empty.hidden=!!n;const params=new URLSearchParams();if(q)params.set('q',q);if(type!=='all')params.set('type',type);roles.forEach(r=>params.append('role',r));history.replaceState({},'',params.toString()?`?${params}`:location.pathname)}search?.addEventListener('input',apply);filters.forEach(x=>x.addEventListener('change',apply));tabs.forEach(tab=>tab.addEventListener('click',()=>{tabs.forEach(t=>t.classList.toggle('active',t===tab));type=tab.dataset.type;apply()}));document.querySelector('.clear')?.addEventListener('click',()=>{if(search)search.value='';filters.forEach(x=>x.checked=false);type='all';apply()});document.querySelector('.filter-toggle')?.addEventListener('click',e=>{const f=document.querySelector('.filters');f.classList.toggle('open');e.currentTarget.setAttribute('aria-expanded',f.classList.contains('open'))})})();
+(() => {
+  const menu = document.querySelector('.menu');
+  const nav = document.querySelector('header nav');
+  if (menu && nav) {
+    menu.addEventListener('click', () => {
+      const open = nav.classList.toggle('open');
+      menu.setAttribute('aria-expanded', open);
+      menu.textContent = open ? 'Close' : 'Menu';
+      document.body.style.overflow = open ? 'hidden' : '';
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && nav.classList.contains('open')) menu.click();
+    });
+  }
+
+  document.querySelectorAll('.copy').forEach(button => button.addEventListener('click', async () => {
+    const pre = button.parentElement.querySelector('pre');
+    const live = button.parentElement.querySelector('.copy-live');
+    const value = pre.textContent.split('\n')
+      .filter(line => !line.trim().startsWith('#'))
+      .map(line => line.replace(/^\$\s?/, '')).join('\n');
+    try {
+      await navigator.clipboard.writeText(value);
+      button.textContent = 'Copied';
+      live.textContent = 'Commands copied';
+      setTimeout(() => button.textContent = 'Copy', 2000);
+    } catch {
+      const range = document.createRange();
+      range.selectNodeContents(pre);
+      getSelection().removeAllRanges();
+      getSelection().addRange(range);
+      live.textContent = 'Clipboard unavailable. Commands selected; copy them manually.';
+    }
+  }));
+
+  document.querySelectorAll('.install-tabs').forEach(group => {
+    const tabs = [...group.querySelectorAll('[role=tab]')];
+    const panels = [...group.querySelectorAll('[role=tabpanel]')];
+    tabs.forEach((tab, index) => tab.addEventListener('click', () => {
+      tabs.forEach((item, other) => item.setAttribute('aria-selected', index === other));
+      panels.forEach((panel, other) => panel.hidden = index !== other);
+    }));
+    group.addEventListener('keydown', event => {
+      if (['ArrowLeft', 'ArrowRight'].includes(event.key)) {
+        const index = tabs.indexOf(document.activeElement);
+        tabs[(index + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length].focus();
+        event.preventDefault();
+      }
+    });
+  });
+
+  const search = document.querySelector('#library-search');
+  if (!search) return;
+  const rows = [...document.querySelectorAll('.resource-row')];
+  const count = document.querySelector('#result-count');
+  const filters = [...document.querySelectorAll('.filters input')];
+  const tabs = [...document.querySelectorAll('.tabs button')];
+  const empty = document.querySelector('.empty');
+  const initial = new URLSearchParams(location.search);
+  let type = tabs.some(tab => tab.dataset.type === initial.get('type')) ? initial.get('type') : 'all';
+  search.value = initial.get('q') || '';
+  filters.forEach(input => input.checked = initial.getAll('role').includes(input.value));
+
+  function apply() {
+    const query = search.value.toLowerCase();
+    const roles = filters.filter(input => input.checked).map(input => input.value);
+    let total = 0;
+    rows.forEach(row => {
+      const match = (!query || row.textContent.toLowerCase().includes(query))
+        && (type === 'all' || row.dataset.type === type)
+        && (!roles.length || roles.includes(row.dataset.role));
+      row.hidden = !match;
+      if (match) total++;
+    });
+    count.textContent = `${total} ${total === 1 ? 'part' : 'parts'}`;
+    empty.hidden = total !== 0;
+    tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.type === type));
+    const params = new URLSearchParams();
+    if (query) params.set('q', query);
+    if (type !== 'all') params.set('type', type);
+    roles.forEach(role => params.append('role', role));
+    history.replaceState({}, '', params.size ? `?${params}` : location.pathname);
+  }
+
+  search.addEventListener('input', apply);
+  filters.forEach(input => input.addEventListener('change', apply));
+  tabs.forEach(tab => tab.addEventListener('click', () => {
+    type = tab.dataset.type;
+    apply();
+  }));
+  document.querySelector('.clear').addEventListener('click', () => {
+    search.value = '';
+    filters.forEach(input => input.checked = false);
+    type = 'all';
+    apply();
+  });
+  document.querySelector('.filter-toggle').addEventListener('click', event => {
+    const open = document.querySelector('.filters').classList.toggle('open');
+    event.currentTarget.setAttribute('aria-expanded', open);
+  });
+  apply();
+})();

@@ -1,393 +1,409 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Builder Garage guide: The review contract."><meta property="og:title" content="The review contract"><meta property="og:description" content="Builder Garage guide: The review contract."><meta property="og:image" content="../../assets/workshop.png"><title>The review contract · Builder Garage</title><link rel="stylesheet" href="../../assets/fonts/fonts.css"><link rel="stylesheet" href="../../site.css"></head><body><a class="skip" href="#main">Skip to content</a><header><a class="brand" href="../../index.html"><img src="../../assets/logo.png" alt="Builder Garage"></a><button class="menu" aria-label="Open navigation" aria-controls="site-nav" aria-expanded="false">Menu</button><nav id="site-nav" aria-label="Primary"><a  href="../../how-it-works/">How it works</a><a  href="../../get-started/">Get Started</a><a  href="../../library/">Library</a><a aria-current="page" href="../../learn/">Learn</a><a  href="../../updates/">Updates</a><a class="github" href="https://github.com/bdonaldharris/builder-garage">GitHub ↗</a></nav></header><main id="main"><article class="article"><a class="back" href="../">← Learn</a><p class="eyebrow">REPOSITORY GUIDE · README.md</p><h1>The review contract</h1><p><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/README.md">View source on GitHub ↗</a></p><div class="reading"><p>&lt;p align=&quot;center&quot;&gt;</p>
-<p>  &lt;img src=&quot;assets/branding/builder-garage-logo.png&quot; alt=&quot;Builder Garage logo: a multitool badge&quot; width=&quot;900&quot;&gt;</p>
-<p>&lt;/p&gt;</p>
-
-<p>**An Agentic Engineering System for Builders**</p>
-
-<p>Builder Garage is an open-source, project-embedded, extensible agentic engineering framework: a system of engineering practices, standards, architecture, roles, contracts, and workflows for responsible software construction with AI agents.</p>
-
-<h3>Project status</h3>
-
-<p>Builder Garage is at its foundation stage.</p>
-
-<p>**What exists today** is the initial `garage` command-line foundation and the project's engineering documentation: the reusable engineering [skills](#skills), the [operating model](#operating-model) and review contract they implement, the [engineering principles](docs/principles.md) and [history](docs/history.md) behind them, and governance and contribution process.</p>
-
-<p>The CLI can display help and version information, initialize, upgrade, validate, show, and change a project's `.garage/config.yaml`, record private developer-local workflow events, install and verify the canonical skills and the manuals a project adopts at a project's harness targets, and show the read-only workflow status of an issue or pull request from GitHub. It does not execute workflows, configure agents, connect to AI providers, load plugins, or provide remote services. No library, adapter, SDK, release automation, or runtime for the conceptual components has been implemented.</p>
-
-<h3>Architectural direction</h3>
-
-<p>The approved direction is recorded in [docs/architecture.md](docs/architecture.md). In summary:</p>
-
-<li>**Project-embedded.** Builder Garage is meant to operate from inside the project it serves, alongside that project's repository, issues, and pull requests, rather than as a separate hosted service.</li>
-<li>**CLI-first.** The `garage` command-line interface is the primary interface. Libraries, adapters, and potentially independent or distributed execution may follow.</li>
-<li>**Extensible.** Projects that adopt it are expected to adapt and extend it.</li>
-<li>**Single repository**, initially.</li>
-<li>**Evolutionary.** Detailed design decisions are made through discovery within the lifecycle of the change that needs them, not in advance.</li>
-
-<h3>The `garage` CLI</h3>
-
-<h4>Capabilities</h4>
-
-<p>The initial executable provides these entry points:</p>
-
-<p>| Command | Behavior |</p>
-<p>| --- | --- |</p>
-<p>| `garage --help` | Describes Builder Garage and lists the available commands. |</p>
-<p>| `garage version` | Reports the build version. `install.sh` and `make build` derive it from Git tags, for example `v0.1.0`; a plain `go build` reports `dev`. See [Versions](#versions). |</p>
-<p>| `garage init` | Creates or upgrades `.garage/config.yaml` in the current project directory. See [Project configuration](#project-configuration). |</p>
-<p>| `garage config validate` | Checks `.garage/config.yaml` against the configuration schema, read-only, and reports every problem. |</p>
-<p>| `garage config show`, `get` | Show every setting in plain language, or print one setting's value. |</p>
-<p>| `garage config set`, `unset`, `add`, `remove` | Change one setting, validated against the complete configuration, confirmed, and written atomically. |</p>
-<p>| `garage record` | Records a private workflow event, such as an implementation handoff or a review verdict, in this developer's local history. See [Local workflow history](#local-workflow-history). |</p>
-<p>| `garage skills install`, `garage skills verify` | Install or update the canonical skills embedded in the binary, and the manuals the project adopts, at the project's declared harness targets, and check them read-only. See [Skill installation](docs/skill-installation.md). |</p>
-<p>| `garage status` | Shows the workflow status of one issue or pull request, read once from GitHub. See [Workflow status](#workflow-status). |</p>
-
-<h4>Project configuration</h4>
-
-<p>`.garage/config.yaml` is the sole canonical source of a project's configured choices. Its `project` section holds the project's values at the extension points the [extension-point registry](docs/extension-points.md) declares. Its `tooling` section holds Garage tooling settings, which grant no workflow authority. The format and lifecycle are in [Project configuration](docs/configuration.md).</p>
-
-<li>**Required values.** Some choices have no default: discovery applicability, and the Workflow Owner, change acceptor, and product-intent acceptor. Otherwise each must be given as a flag, and `init` fails and writes nothing if one is missing. `garage init --help` lists every flag.</li>
-<li>**Guided setup.** In an interactive terminal, `garage init` walks through each choice in plain language when it creates a configuration, with numbered menus and each default shown. It asks only about choices that no flag supplies. It explains the human responsibilities, lets you reuse an authority you already named, and rejects placeholder answers such as `ROLE`. When upgrading an existing configuration, it asks only for missing required values. Either way it shows a summary and writes only after you confirm.</li>
-<li>**Upgrade in place.** Running `garage init` again keeps every existing value and comment, adds only missing settings, and migrates a schema version 1 file to version 2. It never overwrites a configured value, and there is no `--force`. If the existing file is invalid, `init` stops without changing it and explains the correction required.</li>
-<li>**Validation.** `garage config validate` checks the schema and every mechanically checkable value. It does not certify that a configured authority is human, or anything about agents or workflow state.</li>
-<li>**Reading and changing settings.** `garage config show` lists every setting in plain language with its name, and `garage config get` prints one value. `set`, `unset`, `add`, and `remove` change one setting, using `init`'s flag names and formats, for example `garage config set integration-branch main` or `garage config add manual go`. Each change is validated against the complete configuration and shown for confirmation; outside a terminal it needs `--yes`. A change that would leave the configuration invalid is refused, and comments on untouched settings are kept. The commands never commit, push, or open pull requests. Details are in [Project configuration](docs/configuration.md#reading-and-changing-settings-garage-config).</li>
-
-<p>Builder Garage's own configuration is generated by `garage init` and validated in CI; see its [skill-adoption profile](docs/skill-adoption.md#configuration).</p>
-
-<h4>Local workflow history</h4>
-
-<p>`garage record` keeps a private, best-effort annotation of what a developer's agents did:</p>
-
-<pre>
-<p>garage record --issue 39 --type implementation --outcome ready \</p>
-<p>  --url https://github.com/OWNER/REPO/issues/39#issuecomment-123</p>
-<pre>
-
-<li>**Private and local.** Events are stored in the user cache directory, keyed to the repository, and are never written inside the repository or sent anywhere. The command works without GitHub access.</li>
-<li>**Bounded.** At most 500 events are kept per repository.</li>
-<li>**Minimal.** Only a timestamp, the repository key, the issue or pull request number, the event type, the outcome, an optional link to the durable GitHub record, and an optional artifact identity are stored. Branch names, prompts, conversation text, diffs, file contents, environment values, and tokens are not.</li>
-<li>**Not evidence.** GitHub Issue and pull request records are authoritative. Local history never authorizes, blocks, or advances work, and losing it loses nothing that matters.</li>
-<li>**Best effort.** If an event cannot be recorded, `garage record` prints a warning and still exits successfully.</li>
-<li>**Safe to run concurrently.** Recordings to the same repository's history, from separate processes, clones, or worktrees, take turns through an operating-system lock on a file beside the history, so each keeps its event. If the history stays locked for 5 seconds, the event is not recorded and a warning is printed. The lock serializes only these local writes; it never coordinates agents or workflow.</li>
-
-<p>Run `garage record --help` for the accepted event types and outcomes. The design is recorded in the [#19 decision](https://github.com/bdonaldharris/builder-garage/issues/19#issuecomment-6837362562).</p>
-
-<h4>Workflow status</h4>
-
-<p>`garage status 48` shows the workflow status of issue or pull request #48 in the repository's GitHub repository, including closed and merged ones:</p>
-
-<li>**GitHub is the authority.** Status reads GitHub once, through the [`gh`](https://cli.github.com/) command, and writes nothing. Garage never stores a token. It never polls or waits, and it never assigns, invokes, or advances an agent. The next eligible action it shows is information only.</li>
-<li>**Evidence, labeled.** Each line names its source and basis. A fact read from GitHub, or a comparison of recorded values, is *checked*. A verdict or a claim of separate execution contexts is *asserted*. A pull request head's [artifact identity](docs/review-evidence.md) is recomputed only when the commit is already local. Nothing is fetched. In a partial clone, where git fetches missing objects on demand, status does not recompute and says so.</li>
-<li>**Whose records count.** A workflow record counts only when its author's GitHub association is owner, member, or collaborator. A record edited after posting is flagged. Human acceptance is evidenced only by an approving GitHub review. These rules are recorded in the [#40 decision](https://github.com/bdonaldharris/builder-garage/issues/40#issuecomment-6853390215).</li>
-<li>**Degrades clearly.** Without `gh`, or without `gh` authentication, status says that GitHub was not consulted, reports no workflow state, and exits with an error. Local history is shown as a separate annotation, and is never used for any gate.</li>
-
-<h4>Build from source</h4>
-
-<p>Source builds require **Go 1.27.4**, the version declared in [`go.mod`](go.mod). Compiled executables are standalone and do not require a Go installation at run time.</p>
-
-<p>#### Versions</p>
-
-<p>`garage` follows Semantic Versioning, starting at `v0.1.0`. Versions are Git tags; no release artifacts are published yet ([ADR 0002](docs/adr/0002-semantic-versioning.md)).</p>
-
-<p>`install.sh` and `make build` derive the version `garage version` reports from the checkout:</p>
-
-<p>| Checkout | Reported version |</p>
-<p>| --- | --- |</p>
-<p>| Exactly at a version tag, with no local changes | The tag, for example `v0.1.0` |</p>
-<p>| Commits after the tag | Git's descriptive form, for example `v0.1.0-3-gabc1234` |</p>
-<p>| No version tag reachable, for example a shallow clone without tags | The abbreviated commit, for example `abc1234` |</p>
-<p>| Local changes, untracked files included | Any of the above with `-dirty` appended |</p>
-<p>| No Git metadata, for example an extracted source archive | `dev` |</p>
-
-<p>Set `VERSION` to override it, for example `make build VERSION=1.2.3` or `VERSION=1.2.3 ./install.sh`. A plain `go build` derives nothing and reports `dev`, unless a version is supplied at link time, as in [Build by hand](#build-by-hand).</p>
-
-<p>#### Install from source</p>
-
-<p>On macOS and Linux, the supported way to install `garage` is to build it from a checkout with [`install.sh`](install.sh):</p>
-
-<pre>
-<p>git clone https://github.com/bdonaldharris/builder-garage.git</p>
-<p>cd builder-garage</p>
-<p>./install.sh</p>
-<p>garage version</p>
-<pre>
-
-<p>The installer builds `garage` with the same flags as `make build`, and installs it in `~/.local/bin`. To install it somewhere else, use `--install-dir PATH`. It reports the version derived from the checkout, as described under [Versions](#versions); set `VERSION` to override it, as with `make build`. Running it again, for example after `git pull`, upgrades the installed binary in place.</p>
-
-<li>It may create the install directory. It never edits shell startup files or `PATH`. When the install directory isn't on `PATH`, it says what to add.</li>
-<li>It stops, and installs nothing, when the Go version in `go.mod` isn't available. It never lets Go download a toolchain.</li>
-<li>Apart from Go's own build and module caches, and a temporary build directory it removes, it writes nothing outside the install directory: not the checkout, and not any project.</li>
-<li>It does not install skills. Skills are installed separately, per project, with [`garage skills install`](docs/skill-installation.md).</li>
-
-<p>Installing a published release is deferred until release automation exists ([#69](https://github.com/bdonaldharris/builder-garage/issues/69#issuecomment-6867848834)). A Windows installer is a separate follow-up; on Windows, build with `go build` as below.</p>
-
-<p>#### Build by hand</p>
-
-<p>Clone the repository, then build from its root:</p>
-
-<pre>
-<p>go build ./cmd/garage</p>
-<p>./garage --help</p>
-<p>./garage version</p>
-<pre>
-
-<p>A plain `go build` reports `dev`. To supply a version without adding a metadata framework:</p>
-
-<pre>
-<p>go build -ldflags &quot;-X main.version=1.2.3&quot; ./cmd/garage</p>
-<p>./garage version</p>
-<pre>
-
-<p>The `Makefile` provides the same build, and derives the version from Git tags as described under [Versions](#versions) unless `VERSION` is set:</p>
-
-<pre>
-<p>make build</p>
-<p>make build VERSION=1.2.3</p>
-<pre>
-
-<h4>Initialize another project</h4>
-
-<p>Run the compiled executable from the root of the project you want to initialize:</p>
-
-<pre>
-<p>cd /path/to/project</p>
-<p>/path/to/garage init</p>
-<pre>
-
-<p>In a terminal, `init` guides you through each choice and asks you to confirm a summary before writing. To supply the values noninteractively instead:</p>
-
-<pre>
-<p>/path/to/garage init --discovery implementer-judgment \</p>
-<p>  --workflow-owner &quot;lead maintainer&quot; --change-acceptor maintainer \</p>
-<p>  --product-intent-acceptor &quot;Workflow Owner&quot;</p>
-<p>/path/to/garage config validate</p>
-<pre>
-
-<p>This creates `/path/to/project/.garage/config.yaml`. Running `init` again leaves a complete configuration unchanged.</p>
-
-<h4>Develop and validate</h4>
-
-<p>The repository uses Go's standard testing package. The focused checks are:</p>
-
-<pre>
-<p>go test ./...</p>
-<p>go vet ./...</p>
-<p>make fmt-check</p>
-<pre>
-
-<p>Run the full local validation, including a native build and cross-compilation:</p>
-
-<pre>
-<p>make check</p>
-<pre>
-
-<p>Exercise the source installer, which installs only into temporary directories:</p>
-
-<pre>
-<p>sh .github/scripts/test-install.sh</p>
-<pre>
-
-<p>`make cross` writes executables for macOS, Linux, and Windows on amd64 and arm64 to `dist/`. On environments without `make`, the underlying commands are standard `go test`, `go vet`, `gofmt`, and `go build` commands; see [`Makefile`](Makefile) for the exact cross-compilation matrix. Pull requests run the same categories of validation in [GitHub Actions](.github/workflows/ci.yml), with tests on Linux, macOS, and Windows.</p>
-
-<h4>Current limitations</h4>
-
-<li>There are no published releases or installation packages yet. Versions are Git tags only ([Versions](#versions)). `garage` installs from source with [`install.sh`](#install-from-source), on macOS and Linux only; installing a published release is deferred until release automation exists.</li>
-<li>GoReleaser is an approved future direction, but it is not configured.</li>
-<li>The CLI initializes, shows, and changes configuration, records local workflow history, installs and verifies skills and the manuals a project adopts, and shows read-only workflow status only. It does not implement Workbench, Crew, Inspection, or Shipping capabilities, and its only Manuals capability is delivering adopted manuals to agents as skills.</li>
-<li>`garage status` needs the `gh` command, installed and authenticated, to read GitHub.</li>
-<li>The canonical skills read `.garage/config.yaml` only through `garage config validate`, so an agent needs a `garage` binary on its `PATH` to resolve a configured value; [`install.sh`](#install-from-source) puts one there. The configuration configures no agents, plugins, providers, or remote services.</li>
-
-<h3>An engineering discovery journey, built in public</h3>
-
-<p>This repository documents an ongoing effort to discover, test, and refine practical engineering standards for building software with AI agents. It is being shared publicly so the journey is visible—not just its eventual conclusions.</p>
-
-<p>The practices here emerge from real software construction: investigating systems, implementing changes, independently reviewing work, correcting defects, preparing releases, and examining where the process succeeds or fails. Lessons become candidate standards; candidate standards are tested against subsequent work and revised when the evidence warrants it.</p>
-
-<p>This is **working engineering material, not a finished framework or a claim that every question has been settled**. Expect ideas to evolve, decisions to be revisited, and gaps to be documented. The repository captures both what the current operating model requires and why it has developed that way.</p>
-
-<p>The central question is not simply how to generate software faster with AI. It is **how builders can retain engineering judgment, accountability, and reliable control of the software they construct while working with AI agents**.</p>
-
-<p>The repository contains reusable engineering skills, operating contracts, documented standards, [engineering principles](docs/principles.md), and [project history](docs/history.md). Those artifacts are shared to make the reasoning and evolution of the practices inspectable and useful to other builders. They are not a substitute for evaluating the needs, constraints, and risks of a particular system.</p>
-
-<h3>Inside the Garage</h3>
-
-<p>Builder Garage is the home for an evolving, builder-centered engineering system. Its shop vocabulary organizes responsibilities without replacing precise technical terminology or existing engineering contracts. The five shop areas are the framework's conceptual components.</p>
-
-<p>| Shop area | Responsibility |</p>
-<p>| --- | --- |</p>
-<p>| **[Workbench](workbench/)** | Reusable engineering skills, workflows, procedures, and tools. |</p>
-<p>| **[Crew](crew/)** | Distinct engineering agents with explicit responsibilities and handoff boundaries. |</p>
-<p>| **[Inspection](inspection/)** | Independent reviews, tests, acceptance verification, and quality gates. |</p>
-<p>| **[Shipping](shipping/)** | Pull request integration, release readiness, deployment requirements, and promotion. |</p>
-<p>| **[Manuals](manuals/)** | Maintained technical guidance for designing and building with a particular technology, beginning with the [Go Manual](manuals/go.md). |</p>
-
-<p>This is a **conceptual map**, not a required directory hierarchy or a new orchestration mechanism. Existing skill names, paths, invocation aliases, role boundaries, durable Issue/PR records, review contracts, and approval gates remain authoritative. The Garage can adopt automation selectively as practical needs and resources allow.</p>
-
-<p>Each shop area's directory currently contains documentation of its responsibility and boundary. The Manuals directory also contains the baseline manuals themselves, which are guidance, not configuration, and `embed.go`, which embeds them in the `garage` binary so that `garage skills install` can deliver the ones a project adopts. No other shop area contains an implementation. Builder Garage's own adoption of the Go Manual is recorded in [docs/go-manual.md](docs/go-manual.md).</p>
-
-<h3>Operating model</h3>
-
-<p>The engineering system separates responsibilities deliberately:</p>
-
-<li>**Issue/PR = what + durable workflow history/state** — change-specific requirements, acceptance criteria, scope, constraints, implementation/discovery context, and the structured execution record produced by the agents.</li>
-<li>**Skill = how** — reusable workflow rules, role responsibilities, review boundaries, correction flow, reporting requirements, scope control, and recurring `DO NOT` instructions.</li>
-<li>**Prompt = action/location** — identify what should happen, where, and which skill to use.</li>
-<li>**Agent comments = structured execution state and historical record** — concise workflow-state comments make later agent invocations resumable without reconstructing context from chat history.</li>
-
-<p>The current repository/PR artifact remains authoritative for what actually exists. Workflow-state comments record what agents did, found, and decided; they do not override source state.</p>
-
-<p>When an agent is already operating in the correct repository workspace, ordinary prompts should stay extremely concise and should not duplicate issue content, prior workflow history, or workflow rules.</p>
-
-<p>Examples:</p>
-
-<pre>
-<p>Implement FE #1510 using application-implementation-workflow</p>
-<p>Review FE #1510 using indep-review</p>
-<p>Correct FE #1510 using application-implementation-workflow</p>
-<p>Re-review FE #1510 using indep-review</p>
-<p>Assess FE #1510 using readiness-workflow</p>
-<p>Discover FE #1510 using eng-discovery</p>
-<p>Review PR #1501 using pr-review</p>
-<pre>
-
-<p>Structured workflow-state comments use recognizable markers so agents can identify the latest relevant state without assuming the newest GitHub comment is the one that matters:</p>
-
-<pre>
-<p>[AGENT #1 — IMPLEMENTATION]</p>
-<p>[AGENT #1 — CORRECTION]</p>
-<p>[AGENT #2 — INDEPENDENT REVIEW]</p>
-<pre>
-
-<p>Agents should read the governing Issue/PR, identify the latest relevant workflow-state comment for the current phase, inspect the current artifact, perform the skill-defined work, and write the resulting state back to the governing artifact.</p>
-
-<p>For Agent #2 review, the durable record is mandatory. Agent #2 performs two distinct review sequences:</p>
-
-<li>**Implementation review** → write `[AGENT #2 — INDEPENDENT REVIEW]` to the **originating Issue**. Agent #2 reviews the complete implementation before it is proposed as a pull request: the uncommitted working tree by default, or a pushed commit under commit-stage review. The issue record is the authoritative record of that review, and it governs whether the implementation may advance.</li>
-<li>**PR review**, when a PR-review trigger applies → write `[AGENT #2 — INDEPENDENT REVIEW]` to the **PR itself**. The PR record is supplemental. It never replaces the issue-recorded implementation review. The canonical skills define two minimum PR-review triggers: the PR cannot be shown to be artifact-equivalent to the latest Agent #2-approved artifact, or an optional automated reviewer has reported findings on the current head. A project may record additional triggers. Approvals rest on recorded artifact equivalence, not on head-SHA identity. When no trigger applies, the PR proceeds on the issue-recorded review and the remaining merge gates.</li>
-
-<p>The Agent #2 invocation is not complete until that durable comment has been successfully written and verified. A review returned only in the agent response does not satisfy the workflow. If the durable write fails, Agent #2 must report the failure rather than claim the review state was recorded.</p>
-
-<h3>Agent identity and role boundaries</h3>
-
-<p>The [Crew](crew/README.md) describes who does the work:</p>
-<li>**Human authorities** make accountable decisions.</li>
-<li>**Technicians** perform bounded work: `discovery`, `readiness`, `planner`, `implementer`, and `reviewer`.</li>
-<li>**Agent #1 and Agent #2** are workflow positions in the implementation and review sequence. Today the implementer fills Agent #1 and the reviewer fills Agent #2.</li>
-
-<p>Whichever Technicians fill the positions, the same execution context never both implements and independently reviews the same artifact.</p>
-
-<p>Agent #1 and Agent #2 are distinct agents.</p>
-
-<p>They are not personas, modes, phases, or interchangeable responsibilities of one agent.</p>
-
-<p>A skill invocation establishes the executing agent's identity for that execution, and that identity remains fixed until the invocation ends.</p>
-
-<li>**Agent #1 — Implementation Agent** owns implementation, correction, implementation validation, artifact preparation, PR creation/finalization, and other implementation-side integration work assigned by the workflow.</li>
-<li>**Agent #2 — Independent Review Agent** owns independent complete-artifact review, disposition of implementation findings and of any automated-review findings, and approval/rejection under the governing three-question contract.</li>
-
-<p>A transition between Agent #1 and Agent #2 requires a separate agent invocation. Agent #2 runs in its own execution context, such as a separate session or thread. It may use the same tool or model as Agent #1, but it never shares Agent #1's implementation context.</p>
-
-<p>Reaching another agent's responsibility is a **terminal handoff boundary**, not permission for the current agent to assume that role. The current invocation ends at that boundary; it must not wait, poll, monitor, sleep/retry, or autonomously continue when the future state appears.</p>
-
-<p>The role-specific workflow-state markers are owned by their corresponding agent:</p>
-
-<li>Agent #1 may write `[AGENT #1 — IMPLEMENTATION]`.</li>
-<li>Agent #1 may write `[AGENT #1 — CORRECTION]`.</li>
-<li>Agent #2 may write `[AGENT #2 — INDEPENDENT REVIEW]`.</li>
-
-<p>An agent must never create a workflow-state comment representing the other agent.</p>
-
-<p>The normal stop/handoff model is:</p>
-
-<pre>
-<p>Agent #1</p>
-<p>→ implementation</p>
-<p>→ READY FOR AGENT #2 REVIEW</p>
-<p>→ STOP</p>
-
-<p>separate Agent #2 invocation</p>
-<p>→ independent complete-artifact review</p>
-<p>→ write [AGENT #2 — INDEPENDENT REVIEW] to governing Issue/PR</p>
-<p>→ verify durable record exists</p>
-<p>→ APPROVED or CHANGES REQUIRED</p>
-<p>→ STOP</p>
-
-<p>if correction is required:</p>
-
-<p>separate Agent #1 invocation</p>
-<p>→ correction</p>
-<p>→ READY FOR AGENT #2 RE-REVIEW</p>
-<p>→ STOP</p>
-<pre>
-
-<p>Review authority comes from the Agent #2 role and its durable record, not from tool choice. Codex or any other automated reviewer is optional review input where a project uses one. Implementation review requires no GitHub-hosted agent reviewer and no particular vendor integration.</p>
-
-<p>An automated reviewer, such as Codex, is a review input, not Agent #2. Its review does not constitute independent Agent #2 review, its severity does not control disposition, and its returning no findings does not authorize Agent #1 to declare approval. When it reports findings, they trigger an Agent #2 PR review. Posting an Agent #2 PR Review Request is a terminal Agent #1 handoff: Agent #1 stops immediately and does not wait or poll. Only a separately invoked Agent #2 using `independent-implementation-review` may produce an Agent #2 disposition.</p>
-
-<p>When automated findings exist, Agent #2's durable review comment explicitly accounts for every material finding with a concise identification, independent disposition, and reason tied to the three-question contract. `Not applicable` is used only when no applicable automated findings exist.</p>
-
-<p>If Agent #2 requires correction, Agent #1 corrects and Agent #2 re-reviews the complete corrected artifact. `Yes -&gt; No -&gt; Yes = APPROVED — MERGE` is the final substantive correction approval for a PR review. Agent #1 may then commit/push only the exact reviewed artifact, verify artifact equivalence, and proceed to merge when the remaining gates pass. No further review is requested unless implementation code changes after Agent #2 approval; in that case, the changed artifact returns to Agent #2 review.</p>
-
-<h3>Skill shorthand</h3>
-
-<p>Shorthand is an invocation alias only. The canonical skill remains the single source of workflow truth.</p>
-
-<p>| Shorthand | Canonical skill |</p>
-<p>| --- | --- |</p>
-<p>| `implement-workflow` | `application-implementation-workflow` |</p>
-<p>| `indep-review` | `independent-implementation-review` |</p>
-<p>| `readiness-workflow` | `implementation-readiness-workflow` |</p>
-<p>| `eng-discovery` | `engineering-discovery-workflow` |</p>
-<p>| `pr-review` | `integration-pr-review` |</p>
-<p>| `author-issue` | `issue-authoring-workflow` |</p>
-
-<h3>Skills</h3>
-
-<p>Canonical reusable engineering procedures live under `skills/`.</p>
-
-<li>[`application-implementation-workflow`](skills/application-implementation-workflow/SKILL.md) (`implement-workflow`) — Executes as **Agent #1 — Implementation Agent** and governs scoped implementation/correction, durable Issue/PR workflow-state comments, environment/deployment requirement handoff, coherent issue-bound corrections, review handoff boundaries, the issue-recorded review as the authoritative review record, a supplemental Agent #2 PR review only when triggered, Agent #2-owned correction approval, artifact-equivalent finalization, and intentionally boring promotion.</li>
-<li>[`engineering-discovery-workflow`](skills/engineering-discovery-workflow/SKILL.md) (`eng-discovery`) — Governs evidence-based investigation of existing software systems before implementation, including capability classification, cross-layer tracing, gap analysis, and durable discovery reporting. Discovery is not complete until the complete report is recorded in the originating GitHub issue or in an accessible durable artifact directly linked from that issue, and the documentation has been verified.</li>
-<li>[`implementation-readiness-workflow`](skills/implementation-readiness-workflow/SKILL.md) (`readiness-workflow`) — Determines whether a defined change is sufficiently understood to implement responsibly by resolving material architectural, contract, data, authorization, integration, validation, and scope questions before coding begins.</li>
-<li>[`independent-implementation-review`](skills/independent-implementation-review/SKILL.md) (`indep-review`) — Executes as **Agent #2 — Independent Review Agent** and defines the narrow three-question review contract, complete-artifact review, required verified durable Issue/PR disposition comments, bounded sibling-state review, the supplemental PR-review procedure, and auditable independent disposition of every material automated-review finding. Agent #2 never performs implementation/correction work, and its invocation is not complete until the governing Issue/PR record has been successfully written and verified.</li>
-<li>[`issue-authoring-workflow`](skills/issue-authoring-workflow/SKILL.md) (`author-issue`) — Executes as the **planner** Technician. It authors a GitHub issue from durable evidence or a durable decision, and only with the Builder's explicit authorization. It checks for duplicates read-only, resolves the repository's template or Garage's fallback, confirms the full draft, and records the authoring role and evidence ([Issue authoring](docs/issue-authoring.md)). An authored issue never authorizes implementing it. The discovery, implementation, and review skills author their own follow-ups from their own records, under the same procedure.</li>
-<li>[`integration-pr-review`](skills/integration-pr-review/SKILL.md) (`pr-review`) — Executes as **Agent #1 — Implementation Agent** for PR-side integration/finalization responsibilities. It governs durable PR workflow-state comments, artifact equivalence with the issue-approved change, the PR-review triggers and the role-based Agent #2 PR Review Request, hard Agent #2 disposition boundaries, required verified Agent #2 disposition on the PR itself when a PR review occurs, Agent #2-owned final correction approval, Environment / Deployment Requirements gating, and merge convergence without a post-correction review loop. Automated reviewers are optional input.</li>
-
-<h3>Engineering principles</h3>
-
-<p>[docs/principles.md](docs/principles.md) separates the principles the skills and governance already require from evidence-backed candidate principles, which are not requirements, and from unresolved hypotheses. [docs/history.md](docs/history.md) records the engineering lineage those principles came from.</p>
-
-<h3>Review contract</h3>
-
-<p>Application implementation review asks:</p>
-
-<p>1. Was the issue acceptance criteria met?</p>
-<p>2. Did the implementation introduce a new bug or regression?</p>
-<p>3. Does the implemented behavior work?</p>
-
-<p>`Yes -&gt; No -&gt; Yes` means approval. For an integration PR, it means merge once required CI and human approval are satisfied.</p>
-
-<p>Non-blocking review observations belong in the application repository's persistent `Application Improvement Suggestions` backlog rather than automatically becoming standalone issues.</p>
-
-<p>Application engineering should follow the relevant skill and durable GitHub workflow-state record rather than relying on conversational memory or ad hoc prompt reconstruction.</p>
-
-<h3>Contributing</h3>
-
-<p>Builder Garage is maintainer-led and community-contributed. Contributions are welcome.</p>
-
-<li>**[CONTRIBUTING.md](CONTRIBUTING.md)** — how a change is proposed, reviewed, and merged.</li>
-<li>**[Your first contribution](docs/first-contribution.md)** — a walkthrough of one change, from finding an issue to an open pull request.</li>
-<li>**[Open an issue](https://github.com/bdonaldharris/builder-garage/issues/new/choose)** — report a problem, propose a change, or request discovery. Substantive changes start from an issue.</li>
-<li>**[GOVERNANCE.md](GOVERNANCE.md)** — maintainer authority and how decisions are made.</li>
-<li>**[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** — expected conduct.</li>
-<li>**[SECURITY.md](SECURITY.md)** — how to report a vulnerability privately.</li>
-
-<p>A substantive change passes two distinct gates: **independent engineering review** before it is proposed as a pull request, and **maintainer approval** of the pull request before it is merged. Neither replaces the other.</p>
-
-<h3>Contributors</h3>
-
-<p>Builder Garage was founded by B Donald Harris and is built with its community. Everyone whose contribution is merged is a contributor and is recognized in the repository's [contributors list](https://github.com/bdonaldharris/builder-garage/graphs/contributors).</p>
-
-<h3>License</h3>
-
-<p>Builder Garage is released under the [MIT License](LICENSE), copyright © 2026 B Donald Harris. The license permits use, modification, and redistribution, including in proprietary derivative works.</p>
-</div></article></main><footer><img src="../../assets/logo.png" alt="Builder Garage"><p>MIT License · © 2026 B Donald Harris</p><nav aria-label="Footer"><a href="https://github.com/bdonaldharris/builder-garage">GitHub</a><a href="../../contribute/">Contribute</a><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/CODE_OF_CONDUCT.md">Code of Conduct</a><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/SECURITY.md">Security</a><a href="../../rss.xml">RSS</a></nav></footer><script src="../../site.js"></script></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Builder Garage guide: Revision-identifiable review evidence."><meta property="og:title" content="Revision-identifiable review evidence"><meta property="og:description" content="Builder Garage guide: Revision-identifiable review evidence."><meta property="og:image" content="../../assets/workshop.png"><title>Revision-identifiable review evidence · Builder Garage</title><link rel="preload" href="../../assets/fonts/archivo-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="../../assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="../../assets/fonts/fonts.css"><link rel="stylesheet" href="../../site.css"></head><body><a class="skip" href="#main">Skip to content</a><header><a class="brand" href="../../index.html"><img src="../../assets/logo.png" alt="Builder Garage"></a><button class="menu" aria-label="Open navigation" aria-controls="site-nav" aria-expanded="false">Menu</button><nav id="site-nav" aria-label="Primary"><a  href="../../how-it-works/">How it works</a><a  href="../../get-started/">Get Started</a><a  href="../../library/">Library</a><a aria-current="page" href="../../learn/">Learn</a><a  href="../../updates/">Updates</a><a class="github" href="https://github.com/bdonaldharris/builder-garage">GitHub ↗</a></nav></header><main id="main"><article class="article"><a class="back" href="../">← Learn</a><h1>Revision-identifiable review evidence</h1><p><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/docs/review-evidence.md">View source ↗</a></p><div class="reading"><h1 id="revision-identifiable-review-evidence">Revision-Identifiable Review Evidence</h1>
+<p><strong>Status:</strong> Adopted. Designed under <a href="https://github.com/bdonaldharris/builder-garage/issues/34">#34</a>, and adopted into the canonical skills&#39; record templates under <a href="https://github.com/bdonaldharris/builder-garage/issues/33">#33</a>. It implements item 6 of the <a href="https://github.com/bdonaldharris/builder-garage/issues/16#issuecomment-6836671788">#16 maintainer decision</a>.</p>
+<p>This document defines how a workflow record identifies the exact artifact it covers, and how it separates facts that can be checked from claims that cannot. The record templates in the canonical <a href="https://github.com/bdonaldharris/builder-garage/tree/db2fcaca6e315cd2a2732a963b6253edd831926e/skills/">skills</a> carry this format, and Agent #2 stops when valid Agent #1 completion evidence in this format is absent. Records use the resolved object name of the integration branch tip as <code>integration_ref</code>, never a bare branch name. <code>garage status</code> (<a href="https://github.com/bdonaldharris/builder-garage/issues/40">#40</a>) reports these records for one issue or pull request. It keeps the checked and asserted elements separate, compares recorded changesets, and recomputes a committed artifact only from objects already local. It never fetches, so it does not recompute in a partial clone.</p>
+<h2 id="what-does-not-change">What does not change</h2>
+<ul>
+<li><strong>The issue review stays authoritative.</strong> Agent #2&#39;s implementation review on the originating issue governs whether an implementation may advance. A PR review is supplemental. See <a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/GOVERNANCE.md#review-requirements">GOVERNANCE: Review requirements</a>. A digest identifies what a review covered. It does not create review authority, and it does not replace a review.</li>
+<li><strong>Garage cannot certify separate execution contexts.</strong> GitHub shows who posted a comment, not which session produced it. On #17 and #25–#27, every Agent #1 and Agent #2 record was posted by the same account. Context separation is always recorded as an assertion. Nothing in this design verifies it, and no tool built on it may claim to.</li>
+<li><strong>No orchestration.</strong> The design defines values that agents record and that a verifier can recompute. It does not assign, invoke, schedule, or wait for any agent.</li>
+</ul>
+<h2 id="artifact-identity-garage-artifact-v1">Artifact identity: <code>garage-artifact-v1</code></h2>
+<h3 id="what-is-identified">What is identified</h3>
+<p>An artifact is a change: the difference between a <strong>base commit</strong> <code>B</code> and a <strong>result tree</strong> <code>T</code>.</p>
+<div class="table-scroll" role="region" aria-label="Scrollable table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Working-tree artifact: an uncommitted change</th>
+<th>Committed artifact: a pushed head <code>H</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Integration reference <code>I</code></td>
+<td>The project&#39;s configured integration branch tip, as fetched. Builder Garage: <code>origin/main</code>.</td>
+<td>Same</td>
+</tr>
+<tr>
+<td>Base <code>B</code></td>
+<td><code>git merge-base I HEAD</code></td>
+<td><code>git merge-base I H</code> before the PR opens and while it is open. After merge, <code>git merge-base M^1 M^2</code>, where <code>M</code> is the merge commit.</td>
+</tr>
+<tr>
+<td>Result tree <code>T</code></td>
+<td>The working tree, staged into a <strong>temporary</strong> index (procedure below)</td>
+<td><code>H^{tree}</code></td>
+</tr>
+</tbody></table>
+</div>
+<p>An artifact&#39;s <strong>stage</strong> is either <code>working-tree</code> or <code>commit</code>. The stage is set by what the reviewer inspects, not by where the record is posted:</p>
+<ul>
+<li><strong>Working tree.</strong> An implementation reviewed on the issue before commit, which is the default. Also a correction that Agent #2 re-reviews on the PR before Agent #1 commits it (<a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/skills/integration-pr-review/SKILL.md#artifact-equivalence">integration-pr-review: Artifact equivalence</a>).</li>
+<li><strong>Commit.</strong> A pushed PR head, such as one reviewed in a triggered PR review. Also an implementation or correction under commit-stage review: a pushed branch head that is not yet proposed for integration, reviewed on the issue so that a reviewer outside the implementer&#39;s workspace can recompute it (<a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/skills/application-implementation-workflow/SKILL.md#commit-stage-review">application-implementation-workflow: Commit-stage review</a>).</li>
+</ul>
+<p>For a working-tree artifact, the working tree is the artifact, because it is what the reviewer inspects. The developer&#39;s real index is never read or changed.</p>
+<h3 id="recorded-values">Recorded values</h3>
+<div class="table-scroll" role="region" aria-label="Scrollable table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>method</code></td>
+<td><code>garage-artifact-v1</code></td>
+</tr>
+<tr>
+<td><code>object_format</code></td>
+<td>The repository&#39;s object format: <code>sha1</code> or <code>sha256</code> (<code>git rev-parse --show-object-format</code>)</td>
+</tr>
+<tr>
+<td><code>base</code></td>
+<td>The full object name of <code>B</code></td>
+</tr>
+<tr>
+<td><code>tree</code></td>
+<td>The full object name of <code>T</code></td>
+</tr>
+<tr>
+<td><code>changeset</code></td>
+<td><code>sha256:</code> followed by the lowercase hex SHA-256 of the exact bytes written by <code>git diff-tree -r -z --raw --no-abbrev --no-renames B T</code></td>
+</tr>
+<tr>
+<td><code>paths</code></td>
+<td>The number of paths in that output (informational)</td>
+</tr>
+</tbody></table>
+</div>
+<p>The <code>changeset</code> digest hashes Git&#39;s raw change listing. For every changed path, that listing gives the old mode, new mode, old object name, new object name, status, and path, with NUL separators. Because each object name is a content hash, the digest binds the full content of every changed file without hashing patch text.</p>
+<h3 id="equivalence">Equivalence</h3>
+<p>A PR head <code>H</code> is <strong>artifact-equivalent</strong> to an approved artifact <code>A</code> when <code>changeset(H)</code> equals <code>A.changeset</code>. This is the mechanical form of the rule in <a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/skills/integration-pr-review/SKILL.md#artifact-equivalence">integration-pr-review: Artifact equivalence</a>: the head&#39;s changed files and their content match the approved artifact exactly.</p>
+<ul>
+<li>When <code>B</code> is unchanged, <code>tree</code> equality is a stronger check and also holds.</li>
+<li>After a rebase onto, or a merge of, integration commits that touch <strong>none</strong> of the artifact&#39;s paths, <code>tree</code> and <code>base</code> change, but <code>changeset</code> stays equal. The head is still equivalent.</li>
+<li>If the integration branch changed a path the artifact also changes, <code>changeset</code> differs. Equivalence is not shown, and minimum trigger 1 applies. This is intended: the approved change was reviewed against different content.</li>
+</ul>
+<h3 id="edge-cases">Edge cases</h3>
+<div class="table-scroll" role="region" aria-label="Scrollable table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Behavior</th>
+<th>Shown by</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>New untracked file</td>
+<td>Included. <code>git add -A</code> in the temporary index stages it.</td>
+<td>Synthetic test, <code>g.txt</code></td>
+</tr>
+<tr>
+<td>Ignored file</td>
+<td>Excluded, exactly as a commit would exclude it</td>
+<td>Synthetic test, <code>h.log</code></td>
+</tr>
+<tr>
+<td>Binary file</td>
+<td>Identified by its object name. Patch text plays no part.</td>
+<td>Synthetic test, <code>b.bin</code></td>
+</tr>
+<tr>
+<td>Rename</td>
+<td>Listed as a delete plus an add. <code>--no-renames</code> turns detection off, so the result never depends on a similarity threshold.</td>
+<td>Synthetic test, <code>c.txt</code> → <code>c2.txt</code></td>
+</tr>
+<tr>
+<td>Deleted file</td>
+<td>New mode <code>000000</code> and the null object name</td>
+<td>Synthetic test, <code>d.txt</code></td>
+</tr>
+<tr>
+<td>Mode-only change</td>
+<td>Captured by the mode columns</td>
+<td>Synthetic test, <code>e.sh</code>, and a negative case</td>
+</tr>
+<tr>
+<td>Line endings</td>
+<td>The identity is of normalized repository content, as Git would commit it under the repository&#39;s <code>.gitattributes</code> and <code>core.autocrlf</code>. A working-tree change from LF to CRLF in a <code>text=auto</code> file is not a change.</td>
+<td>Synthetic test, <code>f.txt</code></td>
+</tr>
+<tr>
+<td>Index differs from working tree</td>
+<td>The working tree wins, and the index is ignored</td>
+<td>Synthetic test: <code>a.txt</code> staged, then edited again</td>
+</tr>
+<tr>
+<td>Symbolic links and submodules</td>
+<td>Covered by Git&#39;s own modes (<code>120000</code>, <code>160000</code>) and object names</td>
+<td>Follows from the raw format; not separately exercised</td>
+</tr>
+<tr>
+<td>Diff configuration</td>
+<td>Has no effect. <code>diff-tree</code> is a plumbing command, and its raw output does not use diff algorithm, context, prefix, color, or rename settings.</td>
+<td>Synthetic test, seven configuration values</td>
+</tr>
+<tr>
+<td>SHA-1 or SHA-256 repository</td>
+<td>Supported. <code>object_format</code> is recorded so a verifier compares like with like.</td>
+<td>Only <code>sha1</code> exercised</td>
+</tr>
+<tr>
+<td>Sparse checkout</td>
+<td><strong>Not supported in v1.</strong> A temporary index built from <code>HEAD</code> would treat files outside the sparse set as deleted. The procedure refuses with an error.</td>
+<td>Refusal coded; not exercised</td>
+</tr>
+<tr>
+<td>Squash or rebase merge, audited after merge</td>
+<td>There is no merge commit whose parents give <code>B</code>. A post-merge audit must use the <code>base</code> in the approving record.</td>
+<td>Not exercised</td>
+</tr>
+</tbody></table>
+</div>
+<h3 id="why-not-hash-the-patch">Why not hash the patch</h3>
+<p>Builder Garage&#39;s first informational digest, used on #18, was <code>sha256(git diff --binary &lt;base&gt;)</code>. It reproduces at the PR stage only when every machine uses the same diff configuration. It also omits untracked files.</p>
+<ul>
+<li>The #18 change hashes to <code>7794ea3e…</code> by that method. With <code>diff.noprefix=true</code>, the same change hashes to <code>14d94019…</code>.</li>
+<li><code>git diff &lt;base&gt;</code> omits a new untracked file, so an approved change that adds a file would not be identified at the issue stage.</li>
+</ul>
+<p><code>garage-artifact-v1</code> has neither weakness.</p>
+<h3 id="reference-procedure">Reference procedure</h3>
+<p>This POSIX shell procedure is the reference definition. A Garage implementation must produce identical values. It runs from inside the repository.</p>
+<pre><code class="language-sh">#!/bin/sh
+# garage-artifact-v1
+#   artifact-v1.sh &lt;integration-ref&gt;            working-tree artifact (stage: working-tree)
+#   artifact-v1.sh &lt;integration-ref&gt; &lt;commit&gt;   committed artifact (stage: commit)
+set -eu
+ref=$1
+rev=${2:-}
+if [ -n &quot;$rev&quot; ]; then
+  base=$(git merge-base &quot;$ref&quot; &quot;$rev&quot;)
+  tree=$(git rev-parse --verify &quot;$rev^{tree}&quot;)
+else
+  if [ &quot;$(git config --bool core.sparseCheckout || echo false)&quot; = true ]; then
+    echo &quot;garage-artifact-v1: sparse checkouts are not supported&quot; &gt;&amp;2
+    exit 2
+  fi
+  base=$(git merge-base &quot;$ref&quot; HEAD)
+  tmp=$(mktemp -d)
+  trap &#39;rm -rf &quot;$tmp&quot;&#39; EXIT
+  GIT_INDEX_FILE=&quot;$tmp/index&quot; git read-tree HEAD
+  GIT_INDEX_FILE=&quot;$tmp/index&quot; git add -A
+  tree=$(GIT_INDEX_FILE=&quot;$tmp/index&quot; git write-tree)
+fi
+changeset=$(git diff-tree -r -z --raw --no-abbrev --no-renames &quot;$base&quot; &quot;$tree&quot; | shasum -a 256 | cut -d&#39; &#39; -f1)
+paths=$(git diff-tree -r -z --name-only --no-renames &quot;$base&quot; &quot;$tree&quot; | tr -cd &#39;\000&#39; | wc -c | tr -d &#39; &#39;)
+echo &quot;base=$(git rev-parse &quot;$base&quot;) tree=$tree changeset=sha256:$changeset paths=$paths&quot;
+</code></pre>
+<p>For a post-merge audit, pass the merge commit&#39;s first parent as <code>&lt;integration-ref&gt;</code> and its second parent as <code>&lt;commit&gt;</code>.</p>
+<h3 id="demonstrated-results">Demonstrated results</h3>
+<p>Against the real #18 change, reconstructed in a throwaway clone:</p>
+<div class="table-scroll" role="region" aria-label="Scrollable table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Stage</th>
+<th><code>base</code></th>
+<th><code>tree</code></th>
+<th><code>changeset</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Issue stage: base <code>b871324</code>, approved files uncommitted</td>
+<td><code>b8713248…</code></td>
+<td><code>b731c035f7ac5bec41d44a95622c593fad4796d2</code></td>
+<td><code>sha256:45532f9d8c5763fda80a94867d7688680d48c5406325a51b89f8468927ddead0</code></td>
+</tr>
+<tr>
+<td>PR stage: head <code>ae2adf6</code></td>
+<td><code>b8713248…</code></td>
+<td><code>b731c035…</code></td>
+<td><code>sha256:45532f9d…</code> (identical)</td>
+</tr>
+<tr>
+<td>After merge: base from the parents of merge commit <code>9837e3e</code></td>
+<td><code>b8713248…</code></td>
+<td><code>b731c035…</code></td>
+<td><code>sha256:45532f9d…</code> (identical)</td>
+</tr>
+</tbody></table>
+</div>
+<p>A synthetic throwaway repository exercised every case in <a href="#edge-cases">Edge cases</a> that is marked as shown. The working-tree and committed values matched. The changeset survived an unrelated rebase and a merge of the integration branch. A one-byte edit, a mode-only edit, an added file, and an integration change to a path the artifact also changes were each detected.</p>
+<h2 id="evidence-block-garage-evidence-v1">Evidence block: <code>garage-evidence</code> v1</h2>
+<p>A workflow record carries one fenced YAML block. The block separates values a verifier can recompute or confirm (<code>checkable</code>) from claims no verifier can confirm (<code>asserted</code>). The surrounding Markdown comment keeps its existing marker and human-readable sections.</p>
+<h3 id="where-each-record-lives">Where each record lives</h3>
+<p>Location and links depend on the record type, as the canonical skills place each record. The location says nothing about the artifact&#39;s stage.</p>
+<div class="table-scroll" role="region" aria-label="Scrollable table" tabindex="0"><table>
+<thead>
+<tr>
+<th><code>record</code></th>
+<th>Posted on</th>
+<th><code>responds_to</code></th>
+<th>Other required links</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>implementation</code></td>
+<td>The governing issue</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>correction</code></td>
+<td>The governing issue, after an implementation review; or the PR, after a PR review (<a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/skills/integration-pr-review/SKILL.md#phase-4--current-pr-correction">integration-pr-review: Current-PR correction</a>)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>review</code></td>
+<td>The governing issue</td>
+<td>An earlier Agent #1 <code>implementation</code> or <code>correction</code> record on the governing issue</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>pr-review</code></td>
+<td>The PR</td>
+<td>An earlier record on the same PR for the reviewed artifact: the Agent #1 PR state record or Agent #2 PR Review Request for a triggered review, or the Agent #1 <code>correction</code> record for a correction re-review</td>
+<td><code>supplements</code>: an earlier approving <code>review</code> record on the governing issue. A <code>pr-review</code> without one is invalid, because the issue review stays authoritative.</td>
+</tr>
+<tr>
+<td><code>equivalence</code></td>
+<td>The PR</td>
+<td>—</td>
+<td><code>equivalent_to</code>: the approving <code>review</code> on the governing issue, or the approving <code>pr-review</code> on the PR, that the pushed head is equivalent to; <code>none</code> when equivalence is not shown, so minimum trigger 1 applies</td>
+</tr>
+</tbody></table>
+</div>
+<h3 id="agent-1-completion-record">Agent #1 completion record</h3>
+<pre><code class="language-markdown">[AGENT #1 — IMPLEMENTATION]
+
+```yaml
+garage_evidence: 1
+record: implementation        # implementation | correction
+issue: 34
+checkable:
+  artifact:
+    method: garage-artifact-v1
+    object_format: sha1
+    stage: working-tree      # working-tree | commit
+    integration_ref: &lt;full object name of the integration branch tip&gt;
+    base: &lt;full object name&gt;
+    tree: &lt;full object name&gt;
+    changeset: sha256:&lt;64 hex&gt;
+    paths: 1
+asserted:
+  status: ready-for-review    # ready-for-review | ready-for-re-review | material-blocker
+  validation_run: true        # the listed validation was run; its output is not reproduced here
+```
+
+&lt;existing human-readable sections&gt;
+</code></pre>
+<h3 id="agent-2-review-record">Agent #2 review record</h3>
+<pre><code class="language-markdown">[AGENT #2 — INDEPENDENT REVIEW]
+
+```yaml
+garage_evidence: 1
+record: review               # review | pr-review
+issue: 34
+responds_to: &quot;&lt;URL of the record reviewed; see Where each record lives&gt;&quot;
+supplements: &quot;&lt;pr-review only: URL of the approving review on the governing issue&gt;&quot;
+checkable:
+  artifact:                  # recomputed by the reviewer from the artifact it inspected
+    method: garage-artifact-v1
+    object_format: sha1
+    stage: working-tree      # working-tree | commit, by what was inspected, not by record type
+    integration_ref: &lt;full object name of the integration branch tip&gt;
+    base: &lt;full object name&gt;
+    tree: &lt;full object name&gt;
+    changeset: sha256:&lt;64 hex&gt;
+    paths: 1
+    commit: &quot;&lt;present only when stage is commit: the head reviewed&gt;&quot;
+  matches_responds_to: true  # this artifact equals the one in responds_to
+asserted:
+  execution_context: separate-from-implementation
+  inspected: complete-artifact
+  answers: {acceptance_criteria_met: true, new_regression: false, works: true}
+  verdict: approved          # approved | changes-required
+```
+
+&lt;existing human-readable sections&gt;
+</code></pre>
+<h3 id="equivalence-record-on-a-pr">Equivalence record on a PR</h3>
+<p>The <a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/skills/integration-pr-review/SKILL.md#artifact-equivalence">artifact-equivalence record</a> that Agent #1 posts for each pushed head carries the same block, with <code>record: equivalence</code>. Its <code>checkable.artifact</code> is computed at <code>stage: commit</code> for the pushed head. <code>equivalent_to</code> links the approving disposition: the issue review, or a <code>pr-review</code> that approved a PR-side correction.</p>
+<h2 id="what-can-be-checked-and-what-remains-asserted">What can be checked, and what remains asserted</h2>
+<div class="table-scroll" role="region" aria-label="Scrollable table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Classification</th>
+<th>How a verifier treats it</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A record exists, its location (issue or PR), its author account, and its time</td>
+<td><strong>Checked</strong> from GitHub</td>
+<td>Read from the API</td>
+</tr>
+<tr>
+<td>Record location and order, by record type (<a href="#where-each-record-lives">Where each record lives</a>): the record is where its type belongs; <code>responds_to</code> is earlier and in the location its type requires; a <code>pr-review</code>&#39;s <code>supplements</code> is an earlier approving <code>review</code> on the governing issue</td>
+<td><strong>Checked</strong> from GitHub</td>
+<td>Compare locations, timestamps, and URLs</td>
+</tr>
+<tr>
+<td>Block present and well formed</td>
+<td><strong>Checked</strong></td>
+<td>Parse the YAML</td>
+</tr>
+<tr>
+<td>Committed artifact (<code>stage: commit</code>), on any record</td>
+<td><strong>Checked</strong></td>
+<td>Recompute from the repository at <code>commit</code></td>
+</tr>
+<tr>
+<td>Working-tree artifact (<code>stage: working-tree</code>), whether recorded on the issue or on the PR</td>
+<td><strong>Checkable only by a holder of the working tree</strong> at the time, such as Agent #2 recomputing it during review. Later it is <strong>checked transitively</strong>: the changeset of the pushed head whose equivalence record links the approval must equal it.</td>
+<td>Compare with the equivalence record and the head</td>
+</tr>
+<tr>
+<td><code>matches_responds_to</code></td>
+<td><strong>Checked</strong> by comparing the two records&#39; changesets</td>
+<td>Compare values; do not trust the boolean</td>
+</tr>
+<tr>
+<td>CI results, maintainer approving review</td>
+<td><strong>Checked</strong> from GitHub</td>
+<td>Read from the API</td>
+</tr>
+<tr>
+<td>Role (Agent #1 or Agent #2)</td>
+<td><strong>Asserted.</strong> The marker is self-declared, and the author account may be shared.</td>
+<td>Report as asserted</td>
+</tr>
+<tr>
+<td>Separate execution context</td>
+<td><strong>Asserted. Never certified.</strong></td>
+<td>Report as asserted; never as verified</td>
+</tr>
+<tr>
+<td>The three answers, verdict, and depth of inspection</td>
+<td><strong>Asserted</strong> judgment. A verifier confirms only that they are present.</td>
+<td>Report as recorded, not as verified</td>
+</tr>
+<tr>
+<td>Validation was run</td>
+<td><strong>Asserted</strong> unless reproduced, for example by CI</td>
+<td>Report as asserted</td>
+</tr>
+</tbody></table>
+</div>
+<p>A verifier&#39;s output must keep these two columns visible. A &quot;valid&quot; result means only that every checkable element checked. It never means that independence was proven.</p>
+<h2 id="compatibility">Compatibility</h2>
+<ul>
+<li><strong>Integration PR review.</strong> Changeset equality is the equivalence evidence <code>integration-pr-review</code> asks Agent #1 to record. A head whose changeset differs from the latest approved artifact fires minimum trigger 1. Nothing about the two minimum triggers changes.</li>
+<li><strong>Developer-local history (<a href="https://github.com/bdonaldharris/builder-garage/issues/19#issuecomment-6837362562">#19</a>).</strong> A local event&#39;s &quot;artifact identity&quot; field holds <code>method</code>, <code>base</code>, and <code>changeset</code>. These are object names and a digest, with no file content, so the #19 privacy rules are kept. Local events stay non-authoritative.</li>
+<li><strong>Project configuration (<a href="https://github.com/bdonaldharris/builder-garage/issues/35">#35</a>).</strong> <code>integration_ref</code> comes from the configured integration branch (extension point E1 in the <a href="https://github.com/bdonaldharris/builder-garage/issues/16#issuecomment-6836405183">#16 report</a>).</li>
+<li><strong>Records written before adoption.</strong> Free-text and patch-hash records, such as those on #18, remain valid historical evidence. A verifier reports them as <code>legacy</code> and does not try to recompute them.</li>
+</ul>
+<h2 id="not-decided-here">Not decided here</h2>
+<ul>
+<li>Support for sparse checkouts, and post-merge audit of squash or rebase merges without a recorded <code>base</code>.</li>
+</ul>
+</div></article></main><footer><img src="../../assets/logo.png" alt="Builder Garage"><p><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/LICENSE">MIT License</a> · © 2026 B Donald Harris<br><a href="../../updates/">Source details</a></p><nav aria-label="Footer"><a href="https://github.com/bdonaldharris/builder-garage">GitHub</a><a href="../../contribute/">Contribute</a><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/CODE_OF_CONDUCT.md">Code of Conduct</a><a href="https://github.com/bdonaldharris/builder-garage/blob/db2fcaca6e315cd2a2732a963b6253edd831926e/SECURITY.md">Security</a><a href="../../rss.xml">RSS</a></nav></footer><script src="../../site.js"></script></body></html>
