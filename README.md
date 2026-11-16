@@ -43,5 +43,5 @@ Keep build provenance out of the main reading flow: Updates holds the framework 
 
 ## Publish
 
-Run `npm run build`, deploy `dist/` as a static Vercel output, and use the generated `rss.xml`. No server, database, analytics, or authentication is required.
+Run `npm run build`, deploy `dist/` as a static Vercel output, and use the generated `rss.xml`. The repository's `vercel.json` sets the Output Directory to `dist` rather than Vercel's default `public`. No server, database, analytics, or authentication is required.
 
