@@ -11,6 +11,12 @@ const out = resolve(root, 'dist');
 if (!existsSync(resolve(source, 'README.md'))) throw new Error(`Builder Garage source not found: ${source}. Set BUILDER_GARAGE_SOURCE.`);
 rmSync(out, { recursive: true, force: true }); mkdirSync(out, { recursive: true });
 const shortSha = sha.slice(0, 7);
+const releaseVersion = 'v0.1.1';
+const releaseUrl = `${repo}/releases/tag/${releaseVersion}`;
+const releaseVerification = `${repo}/blob/${releaseVersion}/docs/release-verification.md`;
+const releaseInfo = `<p><a href="${releaseUrl}">Download garage ${releaseVersion} on GitHub ↗</a> for macOS, Linux, or Windows on amd64 and arm64. Prebuilt executables do not require Go.</p>
+  <p>Verify the signed checksum manifest and your archive's checksum before running it; GitHub artifact attestations are also available. Follow <a href="${releaseVerification}">release verification and terminal extraction instructions ↗</a>.</p>
+  <p class="callout">macOS binaries are not yet Developer ID signed or notarized; Windows binaries are not yet Authenticode-signed. Gatekeeper restrictions or SmartScreen warnings may appear. Integrity and provenance verification do not replace operating-system publisher trust. Native packages, package-manager channels, and release installers are not yet available.</p>`;
 const text = p => readFileSync(resolve(source, p), 'utf8');
 const goVersion = text('go.mod').match(/^go (\S+)$/m)?.[1];
 if (!goVersion) throw new Error('Framework go.mod is missing its Go version.');
@@ -30,7 +36,7 @@ const manuals = existsSync(resolve(source, 'manuals')) ? readdirSync(resolve(sou
   const path = `manuals/${file}`, [meta] = frontmatter(text(path)); const name = meta.name || basename(file, '.md');
   return { type: 'manuals', name, alias: `manual v${meta.version || '0.1'}`, role: meta.status || 'provisional', summary: meta.description || `${name} engineering manual.`, description: meta.description || `${name} engineering manual.`, path, url: `/library/manuals/${name}/`, sourceUrl: `${repo}/blob/${sha}/${path}`, manual: true };
 }) : [];
-const cli = { type: 'cli', name: 'garage', alias: 'CLI', role: 'foundation', summary: 'A source-built CLI for project configuration, private local workflow records, skill and adopted-manual installation, and read-only GitHub workflow status.', description: 'The CLI initializes and upgrades project configuration; validates, shows, and changes settings; records private local workflow events; installs and verifies canonical skills and adopted manuals; reads issue or pull-request workflow status through gh; and reports its version. It does not execute workflows, configure agents, connect AI providers, load plugins, or provide remote services.', path: 'cmd/garage/main.go', url: '/library/cli/garage/', sourceUrl: `${repo}/blob/${sha}/cmd/garage/main.go` };
+const cli = { type: 'cli', name: 'garage', alias: 'CLI', role: 'foundation', summary: 'A CLI for project configuration, private local workflow records, skill and adopted-manual installation, and read-only GitHub workflow status. Available as a prebuilt binary or source build.', description: 'The CLI initializes and upgrades project configuration; validates, shows, and changes settings; records private local workflow events; installs and verifies canonical skills and adopted manuals; reads issue or pull-request workflow status through gh; and reports its version. It does not execute workflows, configure agents, connect AI providers, load plugins, or provide remote services.', path: 'cmd/garage/main.go', url: '/library/cli/garage/', sourceUrl: `${repo}/blob/${sha}/cmd/garage/main.go` };
 const artifacts = [cli, ...skills, ...manuals];
 const artifactLabel = a => ({ skills: 'Skill', manuals: 'Manual', cli: 'CLI' })[a.type];
 const roles = [...new Set(skills.map(a => a.role))];
@@ -83,7 +89,7 @@ write('', layout({
         <div class="hero-install">
           <div class="terminal-bar"><span class="terminal-lights" aria-hidden="true"><i></i><i></i><i></i></span><span>garage / quick start</span></div>
           ${code(sourceInstall, 'Install from source / macOS + Linux')}
-          <p class="install-note">Requires Go ${esc(goVersion)} to build. No hosted runtime.<br><a href="get-started/#framework">Read the setup guide, including Windows →</a></p>
+          <p class="install-note">Prefer a prebuilt CLI? <a href="${releaseUrl}">Download ${releaseVersion} for macOS, Linux, or Windows ↗</a>.<br>Source builds require Go ${esc(goVersion)}. No hosted runtime.<br><a href="get-started/#framework">Read setup and release verification guidance →</a></p>
         </div>
       </div>
     </section>
@@ -109,7 +115,7 @@ write('', layout({
       <div class="container">
         <h2>Start where you need to.</h2>
         <div class="path-grid">
-          <article><h3>Bring the whole toolkit.</h3><p>Build the CLI from source, initialize a project, and adopt the practices deliberately.</p><a href="get-started/#framework">Use the framework →</a></article>
+          <article><h3>Bring the whole toolkit.</h3><p>Download the CLI or build it from source, initialize a project, and adopt the practices deliberately.</p><a href="get-started/#framework">Use the framework →</a></article>
           <article><h3>Pick the part you need.</h3><p>Browse reusable engineering skills directly. Each download preserves the source structure.</p><a href="get-started/#artifacts">Use individual artifacts →</a></article>
         </div>
       </div>
@@ -176,9 +182,10 @@ function artifactDetail(a, depth = '') {
       ${code(`garage config add manual ${a.name}\ngarage skills install\ngarage skills verify`)}
       <p>The CLI delivers <code>builder-garage-manual-${esc(a.name)}</code> as a skill. Installation alone does not make the guidance apply: the project's configuration must adopt it. Manuals are guidance, not workflow requirements or configuration files. See <a href="${depth}learn/manuals/">how manuals are used</a>.</p>`;
   } else {
-    instructions = `<h2>Install from source</h2>${code(sourceInstall, 'macOS and Linux')}
+    instructions = `<h2>Download a prebuilt CLI</h2>${releaseInfo}
+      <h2>Or build from source</h2>${code(sourceInstall, 'macOS and Linux')}
       <p>${esc(installRequirements)} Compiled executables do not require Go at run time.</p>
-      <p class="callout">${esc(version)} is a Git version tag, not a published binary release. No release artifacts or installation packages are published yet. A plain <code>go build ./cmd/garage</code> reports <code>dev</code>; the installer derives its version from Git.</p>
+      <p>A plain <code>go build ./cmd/garage</code> reports <code>dev</code>; the source installer derives its version from Git.</p>
       <p><a href="${depth}learn/build-from-source/#build-by-hand">Build by hand, including on Windows →</a></p>`;
   }
   return `<article class="artifact">
@@ -205,13 +212,14 @@ write('get-started', layout({
     <section class="content">
       <div class="path-grid">
         <article id="framework"><span class="tag">PATH A</span><h2>Use the framework</h2>
-          <p>Install the CLI from the verified source revision:</p>${code(sourceInstall, 'macOS and Linux')}
+          <h3>Download a prebuilt CLI</h3>${releaseInfo}
+          <h3>Or build from source</h3><p>Install the CLI from the verified source revision:</p>${code(sourceInstall, 'macOS and Linux')}
           <p>${esc(installRequirements)} If <code>~/.local/bin</code> is not on PATH, follow the installer's instructions before continuing.</p>
           <p><a href="../learn/build-from-source/#build-by-hand">Windows and manual builds →</a></p>
           <h3>Configure your project</h3>
           <p>Run these from your project's root. In a terminal, <code>garage init</code> guides you through human authorities, policies, manuals, and skill targets, then asks for confirmation.</p>
           ${code('garage init\ngarage config validate\ngarage skills install\ngarage skills verify', 'from your project root')}
-          <p class="callout">Declare at least one supported user-scope skill target before installing. The installer builds the CLI; <code>garage skills install</code> separately installs the complete embedded canonical skill set and adopted manuals. It never invokes an agent or advances a workflow.</p>
+          <p class="callout">Declare at least one supported user-scope skill target before installing. Downloading or building the CLI does not install skills; <code>garage skills install</code> separately installs the complete embedded canonical skill set and adopted manuals. It never invokes an agent or advances a workflow.</p>
         </article>
         <article id="artifacts"><span class="tag">PATH B</span><h2>Use individual artifacts</h2>
           <p>Download a skill ZIP or manual Markdown file from the Library. Preserve each skill's directory structure and follow your harness's skill-location rules.</p>
@@ -223,9 +231,9 @@ write('get-started', layout({
       </div>
       <h2 id="what-exists-today">What exists today</h2>
       <div class="comparison">
-        <p><b>Available:</b> source installation on macOS and Linux; manual builds including Windows; ${skills.length} reusable engineering skills; ${manuals.length} technology manuals (${[...new Set(manuals.map(a => a.role))].map(esc).join(', ')}); the operating model, review contract, governance, and contribution guides.</p>
+        <p><b>Available:</b> <a href="${releaseUrl}">prebuilt CLI archives for macOS, Linux, and Windows</a> on amd64 and arm64; source builds; ${skills.length} reusable engineering skills; ${manuals.length} technology manuals (${[...new Set(manuals.map(a => a.role))].map(esc).join(', ')}); the operating model, review contract, governance, and contribution guides.</p>
         <p><b>The CLI:</b> initializes and upgrades project configuration; validates, shows, and changes settings; records private local workflow events; installs and verifies canonical skills and adopted manuals; reads issue and pull-request workflow status through authenticated <code>gh</code>; and reports its version.</p>
-        <p><b>Not implemented:</b> workflow execution or agent orchestration, agent configuration, AI-provider connections, plugin loading, remote services, libraries, adapters, SDKs, or release automation. Version tags exist, but published binary releases and installation packages do not.</p>
+        <p><b>Not implemented:</b> workflow execution or agent orchestration, agent configuration, AI-provider connections, plugin loading, remote services, libraries, adapters, or SDKs. Native packages, package-manager channels, and release installers are not yet available.</p>
       </div>
     </section>`
 }));
@@ -262,10 +270,17 @@ write('learn', layout({
     </div></section>`
 }));
 for (const [guideSlug, guideTitle, guidePath] of guideFiles) {
-  const body = renderMarkdown(text(guidePath), { source, repo, sha, path: guidePath });
+  let markdown = text(guidePath);
+  if (guidePath === 'README.md') {
+    markdown = markdown
+      .replace('; no release is published yet.', `; [${releaseVersion}](${releaseUrl}) is now published.`)
+      .replace('and the first published release will be `v0.1.1` ([ADR 0003](docs/adr/0003-release-distribution.md)); none is published yet.', `and [${releaseVersion}](${releaseUrl}) is the first published release ([ADR 0003](docs/adr/0003-release-distribution.md)).`)
+      .replace(/^- No release is published yet\..*$/m, `- [${releaseVersion}](${releaseUrl}) provides prebuilt CLI archives for macOS, Linux, and Windows on amd64 and arm64. Verify the signed checksum manifest and archive checksum before running a binary; see [Verifying a release](${releaseVerification}). Source installation with [\`install.sh\`](#install-from-source) remains available on macOS and Linux.`);
+  }
+  const body = renderMarkdown(markdown, { source, repo, sha, path: guidePath });
   write(`learn/${guideSlug}`, layout({
     title: guideTitle, description: `Builder Garage guide: ${guideTitle}.`, current: 'learn/', depth: '../../',
-    body: `<article class="article"><a class="back" href="../">← Learn</a><h1>${esc(guideTitle)}</h1><p><a href="${repo}/blob/${sha}/${guidePath}">View source ↗</a></p><div class="reading">${body}</div></article>`
+    body: `<article class="article"><a class="back" href="../">← Learn</a><h1>${esc(guideTitle)}</h1><p><a href="${repo}/blob/${sha}/${guidePath}">View source ↗</a></p>${guidePath === 'README.md' ? `<p class="callout">Release availability is updated for <a href="${releaseUrl}">${releaseVersion}</a>; the tagged README was written before publication.</p>` : ''}<div class="reading">${body}</div></article>`
   }));
 }
 write('updates', layout({
@@ -274,7 +289,7 @@ write('updates', layout({
     <section class="content updates"><h2>Verified source snapshot</h2>
       <a href="${repo}/commit/${sha}"><code>${esc(version)} · ${shortSha}</code> · Source for this site build</a>
       <p>The website is pinned to this revision, not a live view of GitHub. Its Library contains ${skills.length} skills, ${manuals.length} manuals, and the CLI foundation.</p>
-      <h2>Versions, not binary releases</h2><p>Version tags exist. Published release artifacts and release automation are not available yet. Source installation is supported on macOS and Linux.</p>
+      <h2>Binary releases</h2>${releaseInfo}
       <a href="${repo}/tags">Version tags on GitHub ↗</a>
       <h2>Project record</h2><a href="${repo}/tree/${sha}/docs/adr">Architecture decision records ↗</a><a href="${repo}/blob/${sha}/docs/history.md">Project history ↗</a><p>Follow website source-snapshot updates with <a href="../rss.xml">RSS</a>.</p>
     </section>`

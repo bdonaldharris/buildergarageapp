@@ -84,6 +84,16 @@ for (const guide of catalog.guides) {
 const updates = readFileSync(resolve(dist, 'updates/index.html'), 'utf8');
 assert.ok(updates.includes(`${catalog.version} · ${sha.slice(0, 7)}`), 'Updates retains snapshot provenance');
 assert.ok(home.includes(`git checkout ${sha}`), 'Install commands retain the exact revision');
+const releaseUrl = `${repo}/releases/tag/v0.1.1`;
+for (const page of ['index.html', 'get-started/index.html', 'library/index.html', 'library/cli/garage/index.html', 'updates/index.html', 'learn/build-from-source/index.html']) {
+  const html = readFileSync(resolve(dist, page), 'utf8');
+  assert.ok(html.includes(`href="${releaseUrl}"`), `Published binaries are discoverable: ${page}`);
+  assert.ok(!/no release is published yet|none is published yet|first published release will be|not a published binary release|published binary releases and installation packages do not|release automation are not available yet/i.test(html), `Release availability is current: ${page}`);
+}
+for (const html of [gettingStarted, updates, readFileSync(resolve(dist, 'library/cli/garage/index.html'), 'utf8')]) {
+  assert.ok(html.includes('Developer ID') && html.includes('Authenticode') && html.includes('Gatekeeper') && html.includes('SmartScreen'), 'Binary guidance discloses platform trust limitations');
+  assert.ok(html.includes('docs/release-verification.md'), 'Binary guidance links to verification instructions');
+}
 
 const fontStylesheet = resolve(dist, 'assets/fonts/fonts.css');
 const fonts = readFileSync(fontStylesheet, 'utf8');
