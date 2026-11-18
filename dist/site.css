@@ -41,7 +41,7 @@ a {
   font-weight: 600;
 }
 
-a:focus-visible,button:focus-visible,input:focus-visible {
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible {
   outline: 2px solid var(--blue);
   outline-offset: 3px;
 }
@@ -618,6 +618,33 @@ h1,h2,h3 {
 }
 
 /* Interior page headers */
+.download-page label {
+  display: block;
+  font-weight: 700;
+}
+
+.download-page select {
+  font: inherit;
+  min-height: 44px;
+  width: min(100%, 300px);
+  padding: 8px;
+  border: 1px solid var(--muted);
+  border-radius: 6px;
+  background: white;
+  color: var(--ink);
+}
+
+.download-platform {
+  border-top: 1px solid var(--border);
+  padding: 24px 0;
+}
+
+.download-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .page-head {
   background-color: var(--graphite);
   background-image: radial-gradient(#263042 1px,transparent 1px);

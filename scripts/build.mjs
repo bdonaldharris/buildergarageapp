@@ -4,6 +4,7 @@ import { basename, dirname, resolve } from 'node:path';
 import { frameworkSource } from './source.mjs';
 import { renderMarkdown } from './markdown.mjs';
 import { openExternalLinks } from './links.mjs';
+import { loadRelease } from './release.mjs';
 
 const root = resolve('.');
 const { source, repo, sha, version } = await frameworkSource(root);
@@ -11,12 +12,13 @@ const out = resolve(root, 'dist');
 if (!existsSync(resolve(source, 'README.md'))) throw new Error(`Builder Garage source not found: ${source}. Set BUILDER_GARAGE_SOURCE.`);
 rmSync(out, { recursive: true, force: true }); mkdirSync(out, { recursive: true });
 const shortSha = sha.slice(0, 7);
-const releaseVersion = 'v0.1.1';
+const release = loadRelease(resolve(root, 'release.json'));
+const releaseVersion = release.version;
 const releaseUrl = `${repo}/releases/tag/${releaseVersion}`;
 const releaseVerification = `${repo}/blob/${releaseVersion}/docs/release-verification.md`;
-const releaseInfo = `<p><a href="${releaseUrl}">Download garage ${releaseVersion} on GitHub ↗</a> for macOS, Linux, or Windows on amd64 and arm64. Prebuilt executables do not require Go.</p>
+const releaseInfo = `<p><a href="/download/">Download garage ${releaseVersion}</a> for macOS, Linux, or Windows on amd64 and arm64. Prebuilt executables do not require Go.</p>
   <p>Verify the signed checksum manifest and your archive's checksum before running it; GitHub artifact attestations are also available. Follow <a href="${releaseVerification}">release verification and terminal extraction instructions ↗</a>.</p>
-  <p class="callout">macOS binaries are not yet Developer ID signed or notarized; Windows binaries are not yet Authenticode-signed. Gatekeeper restrictions or SmartScreen warnings may appear. Integrity and provenance verification do not replace operating-system publisher trust. Native packages, package-manager channels, and release installers are not yet available.</p>`;
+  <p class="callout">Check the <a href="${releaseUrl}">release notes</a> for current platform signing status. Gatekeeper or SmartScreen warnings may appear. Integrity and provenance verification do not replace operating-system publisher trust.</p>`;
 const text = p => readFileSync(resolve(source, p), 'utf8');
 const goVersion = text('go.mod').match(/^go (\S+)$/m)?.[1];
 if (!goVersion) throw new Error('Framework go.mod is missing its Go version.');
@@ -89,7 +91,7 @@ write('', layout({
         <div class="hero-install">
           <div class="terminal-bar"><span class="terminal-lights" aria-hidden="true"><i></i><i></i><i></i></span><span>garage / quick start</span></div>
           ${code(sourceInstall, 'Install from source / macOS + Linux')}
-          <p class="install-note">Prefer a prebuilt CLI? <a href="${releaseUrl}">Download ${releaseVersion} for macOS, Linux, or Windows ↗</a>.<br>Source builds require Go ${esc(goVersion)}. No hosted runtime.<br><a href="get-started/#framework">Read setup and release verification guidance →</a></p>
+          <p class="install-note">Prefer a prebuilt CLI? <a href="download/">Download ${releaseVersion} for macOS, Linux, or Windows →</a>.<br>Source builds require Go ${esc(goVersion)}. No hosted runtime.<br><a href="get-started/#framework">Read setup and release verification guidance →</a></p>
         </div>
       </div>
     </section>
@@ -201,6 +203,39 @@ function artifactDetail(a, depth = '') {
   </article>`;
 }
 write('library', libraryPage()); for (const a of artifacts) write(`library/${a.type}/${a.name}`, libraryPage(a, true));
+
+const releaseAsset = name => release.assets.find(asset => asset.name === name);
+const releaseNumber = releaseVersion.slice(1);
+function downloadLink(name, label) {
+  const asset = releaseAsset(name);
+  return asset ? `<a class="button secondary ink" href="${esc(asset.url)}">${esc(label)}</a>` : '';
+}
+write('download', layout({
+  title: 'Download the CLI', description: 'Download the Builder Garage CLI for your operating system.', depth: '../',
+  body: `${pageHead('Download the CLI.', `Choose an operating system and architecture for garage ${esc(releaseVersion)}.`)}
+    <section class="content download-page">
+      <p>Prebuilt executables run without Go. Downloads come from the <a href="${releaseUrl}">${esc(releaseVersion)} GitHub release</a>.</p>
+      <label for="download-os">Operating system</label>
+      <select id="download-os"><option value="all">All operating systems</option><option value="windows">Windows</option><option value="macos">macOS</option><option value="linux">Linux</option></select>
+      <p>Choose your processor architecture; if unsure, check your system settings. Select a different operating system if downloading for another computer.</p>
+      <section class="download-platform" data-platform="windows"><h2>Windows</h2>
+        <div class="download-links">${downloadLink(`garage_${releaseNumber}_windows_amd64.zip`, 'Windows · x64 (.zip)')}${downloadLink(`garage_${releaseNumber}_windows_arm64.zip`, 'Windows · ARM64 (.zip)')}</div>
+        <p>Windows code-signing acknowledgment: <a href="https://signpath.io/">SignPath.io</a> and <a href="https://signpath.org/">SignPath Foundation</a>. Consult the <a href="${releaseUrl}">release notes</a> to confirm whether this release is signed; unsigned binaries may trigger SmartScreen warnings.</p>
+      </section>
+      <section class="download-platform" data-platform="macos"><h2>macOS</h2>
+        <div class="download-links">${downloadLink(`garage_${releaseNumber}_darwin_arm64.tar.gz`, 'macOS · Apple silicon (.tar.gz)')}${downloadLink(`garage_${releaseNumber}_darwin_amd64.tar.gz`, 'macOS · Intel (.tar.gz)')}</div>
+        <p>Consult the <a href="${releaseUrl}">release notes</a> for signing and notarization status. Gatekeeper restrictions may apply.</p>
+      </section>
+      <section class="download-platform" data-platform="linux"><h2>Linux</h2>
+        <div class="download-links">${downloadLink(`garage_${releaseNumber}_linux_amd64.tar.gz`, 'Linux · x64 (.tar.gz)')}${downloadLink(`garage_${releaseNumber}_linux_arm64.tar.gz`, 'Linux · ARM64 (.tar.gz)')}${downloadLink(`garage_${releaseNumber}_linux_amd64.deb`, 'Linux · x64 (.deb)')}${downloadLink(`garage_${releaseNumber}_linux_arm64.deb`, 'Linux · ARM64 (.deb)')}${downloadLink(`garage-${releaseNumber}-1.x86_64.rpm`, 'Linux · x64 (.rpm)')}${downloadLink(`garage-${releaseNumber}-1.aarch64.rpm`, 'Linux · ARM64 (.rpm)')}</div>
+      </section>
+      <h2>Verify before running</h2>
+      <p>Verify the signed checksum manifest and your archive or package checksum before running or installing. Artifact attestations are also available. Verification establishes integrity and origin, not operating-system publisher trust. Follow the <a href="${releaseVerification}">release verification instructions</a>.</p>
+      <p><a href="${esc(releaseAsset(`garage_${releaseNumber}_checksums.txt`).url)}">Checksum manifest ↗</a> · <a href="${esc(releaseAsset(`garage_${releaseNumber}_checksums.txt.sigstore.json`).url)}">Signature bundle ↗</a></p>
+      <p>The CLI release is ${esc(releaseVersion)} (<a href="${repo}/commit/${release.revision}">${release.revision.slice(0, 7)}</a>); the site's Library and guides use the separately pinned ${esc(version)} source snapshot (<a href="${repo}/commit/${sha}">${shortSha}</a>). They may contain different revisions.</p>
+      <p><a href="../get-started/#framework">Continue to project setup and source builds →</a></p>
+    </section>`
+}));
 const harness = `<table><thead><tr><th>Harness</th><th>CLI-managed user directory</th></tr></thead><tbody>
   <tr><th>Claude Code</th><td><code>~/.claude/skills</code></td></tr>
   <tr><th>Codex</th><td><code>~/.codex/skills</code></td></tr>
@@ -231,9 +266,9 @@ write('get-started', layout({
       </div>
       <h2 id="what-exists-today">What exists today</h2>
       <div class="comparison">
-        <p><b>Available:</b> <a href="${releaseUrl}">prebuilt CLI archives for macOS, Linux, and Windows</a> on amd64 and arm64; source builds; ${skills.length} reusable engineering skills; ${manuals.length} technology manuals (${[...new Set(manuals.map(a => a.role))].map(esc).join(', ')}); the operating model, review contract, governance, and contribution guides.</p>
+        <p><b>Available:</b> <a href="../download/">prebuilt CLI archives for macOS, Linux, and Windows</a> on amd64 and arm64; source builds; ${skills.length} reusable engineering skills; ${manuals.length} technology manuals (${[...new Set(manuals.map(a => a.role))].map(esc).join(', ')}); the operating model, review contract, governance, and contribution guides.</p>
         <p><b>The CLI:</b> initializes and upgrades project configuration; validates, shows, and changes settings; records private local workflow events; installs and verifies canonical skills and adopted manuals; reads issue and pull-request workflow status through authenticated <code>gh</code>; and reports its version.</p>
-        <p><b>Not implemented:</b> workflow execution or agent orchestration, agent configuration, AI-provider connections, plugin loading, remote services, libraries, adapters, or SDKs. Native packages, package-manager channels, and release installers are not yet available.</p>
+        <p><b>Not implemented:</b> workflow execution or agent orchestration, agent configuration, AI-provider connections, plugin loading, remote services, libraries, adapters, or SDKs.</p>
       </div>
     </section>`
 }));
@@ -274,13 +309,13 @@ for (const [guideSlug, guideTitle, guidePath] of guideFiles) {
   if (guidePath === 'README.md') {
     markdown = markdown
       .replace('; no release is published yet.', `; [${releaseVersion}](${releaseUrl}) is now published.`)
-      .replace('and the first published release will be `v0.1.1` ([ADR 0003](docs/adr/0003-release-distribution.md)); none is published yet.', `and [${releaseVersion}](${releaseUrl}) is the first published release ([ADR 0003](docs/adr/0003-release-distribution.md)).`)
+      .replace('and the first published release will be `v0.1.1` ([ADR 0003](docs/adr/0003-release-distribution.md)); none is published yet.', `and [v0.1.1](${repo}/releases/tag/v0.1.1) was the first published release ([ADR 0003](docs/adr/0003-release-distribution.md)).`)
       .replace(/^- No release is published yet\..*$/m, `- [${releaseVersion}](${releaseUrl}) provides prebuilt CLI archives for macOS, Linux, and Windows on amd64 and arm64. Verify the signed checksum manifest and archive checksum before running a binary; see [Verifying a release](${releaseVerification}). Source installation with [\`install.sh\`](#install-from-source) remains available on macOS and Linux.`);
   }
   const body = renderMarkdown(markdown, { source, repo, sha, path: guidePath });
   write(`learn/${guideSlug}`, layout({
     title: guideTitle, description: `Builder Garage guide: ${guideTitle}.`, current: 'learn/', depth: '../../',
-    body: `<article class="article"><a class="back" href="../">← Learn</a><h1>${esc(guideTitle)}</h1><p><a href="${repo}/blob/${sha}/${guidePath}">View source ↗</a></p>${guidePath === 'README.md' ? `<p class="callout">Release availability is updated for <a href="${releaseUrl}">${releaseVersion}</a>; the tagged README was written before publication.</p>` : ''}<div class="reading">${body}</div></article>`
+    body: `<article class="article"><a class="back" href="../">← Learn</a><h1>${esc(guideTitle)}</h1><p><a href="${repo}/blob/${sha}/${guidePath}">View source ↗</a></p>${guidePath === 'README.md' ? `<p class="callout">This guide reflects the ${esc(version)} source snapshot, which predates its release. For current downloads and signing status, see <a href="../../download/">Download the CLI</a>.</p>` : ''}<div class="reading">${body}</div></article>`
   }));
 }
 write('updates', layout({

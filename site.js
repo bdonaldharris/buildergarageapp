@@ -49,6 +49,23 @@
     });
   });
 
+  const osSelect = document.querySelector('#download-os');
+  if (osSelect) {
+    const platforms = [...document.querySelectorAll('.download-platform')];
+    function showPlatform() {
+      platforms.forEach(panel => panel.hidden = osSelect.value !== 'all' && panel.dataset.platform !== osSelect.value);
+    }
+    const userAgent = navigator.userAgent || '';
+    const platform = navigator.userAgentData?.platform || navigator.platform || '';
+    if (!/android|iphone|ipad|ipod/i.test(`${platform} ${userAgent}`)) {
+      if (/windows|win32|win64/i.test(platform)) osSelect.value = 'windows';
+      else if (/mac/i.test(platform) && !(navigator.maxTouchPoints > 1 && /mac/i.test(platform))) osSelect.value = 'macos';
+      else if (/linux/i.test(platform)) osSelect.value = 'linux';
+    }
+    osSelect.addEventListener('change', showPlatform);
+    showPlatform();
+  }
+
   const search = document.querySelector('#library-search');
   if (!search) return;
   const rows = [...document.querySelectorAll('.resource-row')];

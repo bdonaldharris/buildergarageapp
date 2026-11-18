@@ -1,0 +1,41 @@
+name: Update CLI release
+
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-cli-release
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: node scripts/update-release.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Validate and publish update
+        run: |
+          if git diff --quiet -- release.json; then
+            echo "Release manifest is already current."
+            exit 0
+          fi
+          npm run check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add release.json
+          git add -u -- dist
+          git diff --cached --check
+          git commit -m "Update CLI release manifest"
+          git push origin HEAD:main

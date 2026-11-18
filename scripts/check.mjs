@@ -3,12 +3,13 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { frameworkSource } from './source.mjs';
+import { loadRelease } from './release.mjs';
 
 const dist = resolve('dist');
 const vercel = JSON.parse(readFileSync(resolve('vercel.json'), 'utf8'));
 assert.ok(vercel.redirects.some(rule => rule.source === '/index.html' && rule.destination === '/' && rule.permanent === true), 'Legacy homepage URL permanently redirects to root');
 const { source, repo, sha } = await frameworkSource(resolve('.'));
-const required = ['index.html', 'library/index.html', 'get-started/index.html', '404.html', 'rss.xml', 'site.css', 'site.js', 'source.json'];
+const required = ['index.html', 'download/index.html', 'library/index.html', 'get-started/index.html', '404.html', 'rss.xml', 'site.css', 'site.js', 'source.json'];
 for (const file of required) if (!existsSync(resolve(dist, file))) throw new Error(`Missing build output: ${file}`);
 const library = readFileSync(resolve(dist, 'library/index.html'), 'utf8');
 if (!library.includes('aria-live') || !library.includes('Search the library')) throw new Error('Library accessibility controls missing');
@@ -84,16 +85,21 @@ for (const guide of catalog.guides) {
 const updates = readFileSync(resolve(dist, 'updates/index.html'), 'utf8');
 assert.ok(updates.includes(`${catalog.version} · ${sha.slice(0, 7)}`), 'Updates retains snapshot provenance');
 assert.ok(home.includes(`git checkout ${sha}`), 'Install commands retain the exact revision');
-const releaseUrl = `${repo}/releases/tag/v0.1.1`;
-for (const page of ['index.html', 'get-started/index.html', 'library/index.html', 'library/cli/garage/index.html', 'updates/index.html', 'learn/build-from-source/index.html']) {
+const release = loadRelease();
+const releaseUrl = `${repo}/releases/tag/${release.version}`;
+for (const page of ['download/index.html', 'learn/build-from-source/index.html']) {
   const html = readFileSync(resolve(dist, page), 'utf8');
   assert.ok(html.includes(`href="${releaseUrl}"`), `Published binaries are discoverable: ${page}`);
   assert.ok(!/no release is published yet|none is published yet|first published release will be|not a published binary release|published binary releases and installation packages do not|release automation are not available yet/i.test(html), `Release availability is current: ${page}`);
 }
-for (const html of [gettingStarted, updates, readFileSync(resolve(dist, 'library/cli/garage/index.html'), 'utf8')]) {
-  assert.ok(html.includes('Developer ID') && html.includes('Authenticode') && html.includes('Gatekeeper') && html.includes('SmartScreen'), 'Binary guidance discloses platform trust limitations');
+for (const html of [gettingStarted, updates, readFileSync(resolve(dist, 'library/cli/garage/index.html'), 'utf8'), readFileSync(resolve(dist, 'download/index.html'), 'utf8')]) {
+  assert.ok(html.includes('Gatekeeper') && html.includes('SmartScreen'), 'Binary guidance discloses platform trust limitations');
   assert.ok(html.includes('docs/release-verification.md'), 'Binary guidance links to verification instructions');
 }
+const download = readFileSync(resolve(dist, 'download/index.html'), 'utf8');
+for (const asset of release.assets) assert.ok(download.includes(`href="${asset.url}"`), `Download page links to ${asset.name}`);
+assert.ok(download.includes('signpath.io') && download.includes('signpath.org'), 'Windows signing acknowledgment is present');
+assert.ok(download.includes(release.revision.slice(0, 7)) && download.includes(sha.slice(0, 7)), 'Release and source revisions are distinct');
 
 const fontStylesheet = resolve(dist, 'assets/fonts/fonts.css');
 const fonts = readFileSync(fontStylesheet, 'utf8');
