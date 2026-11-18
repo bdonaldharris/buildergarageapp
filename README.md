@@ -45,6 +45,8 @@ Page and section headings establish hierarchy without eyebrow labels. Workflow s
 
 External web links, including links in source-backed guides, open in a new tab with `noopener noreferrer`. Internal links, downloads, and email links retain their normal behavior.
 
+The footer links to a website privacy policy generated in `scripts/build.mjs`. Review it whenever hosting, analytics, browser-side behavior, or the privacy contact changes.
+
 Learn guides use a 1200px article shell with prose capped at 75ch. Tables and code can use the full inner width; tables use 16px text and keyboard-focusable horizontal scrolling when needed. Mobile guides retain 16px gutters.
 
 Keep build provenance out of the main reading flow: Updates holds the framework version and revision, linked as "Source details" from every footer. Artifact revisions and skill file inventories live in collapsed technical details; roles, provisional status, and installation requirements stay visible. Guide headers link to their pinned source without repeating repository paths or revisions. The source manifest, installation commands, downloads, and upstream guide content retain their technical detail. The source-build guide explicitly labels its release-availability corrections because the tagged README predates publication; other source content is unchanged. Review those corrections when updating the snapshot.

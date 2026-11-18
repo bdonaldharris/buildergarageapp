@@ -9,7 +9,7 @@ const dist = resolve('dist');
 const vercel = JSON.parse(readFileSync(resolve('vercel.json'), 'utf8'));
 assert.ok(vercel.redirects.some(rule => rule.source === '/index.html' && rule.destination === '/' && rule.permanent === true), 'Legacy homepage URL permanently redirects to root');
 const { source, repo, sha } = await frameworkSource(resolve('.'));
-const required = ['index.html', 'download/index.html', 'library/index.html', 'get-started/index.html', '404.html', 'rss.xml', 'site.css', 'site.js', 'source.json'];
+const required = ['index.html', 'download/index.html', 'privacy/index.html', 'library/index.html', 'get-started/index.html', '404.html', 'rss.xml', 'site.css', 'site.js', 'source.json'];
 for (const file of required) if (!existsSync(resolve(dist, file))) throw new Error(`Missing build output: ${file}`);
 const library = readFileSync(resolve(dist, 'library/index.html'), 'utf8');
 if (!library.includes('aria-live') || !library.includes('Search the library')) throw new Error('Library accessibility controls missing');
@@ -33,6 +33,7 @@ for (const [path, html] of pages) {
   assert.ok(!/\bclass="[^"]*\beyebrow\b/.test(html), `Page omits eyebrow labels: ${path}`);
   const footer = html.match(/<footer>[\s\S]*?<\/footer>/)?.[0];
   assert.ok(footer?.includes('>Source details</a>'), `Footer links to source details: ${path}`);
+  assert.match(footer, /<a href="[^"]*privacy\/">Privacy<\/a>/, `Footer links to privacy policy: ${path}`);
   const footerText = footer.replace(/<[^>]*>/g, '');
   assert.ok(!footerText.includes(sha.slice(0, 7)) && !footerText.includes(catalog.version), `Footer omits repeated provenance: ${path}`);
   const base = new URL(path.slice(dist.length), 'https://site.invalid');
