@@ -41,7 +41,7 @@ Edit `site.css` for the sectioned stylesheet, `site.js` for interactions, and `s
 
 Brand images and self-hosted Latin-subset Archivo, Inter, and JetBrains Mono fonts live in `assets/` and are copied into each build. Font faces use `font-display: swap`; the display and body faces used above the fold are preloaded. Font licenses are included in `assets/fonts/OFL-*.txt`. No external font service or temporary handoff directory is required.
 
-The homepage leads with a prominent centered logo above the headline and copyable source-build snippet, followed by a five-step workflow. Open shop-floor columns and ruled adoption paths lead to compact resource links; detailed descriptions remain in the Library.
+The homepage leads with a prominent centered logo above the headline and copyable source-build snippet, followed by a five-step workflow. Open shop-floor columns and ruled adoption paths lead to CLI, Skills, and Manuals category links that open the corresponding Library filter.
 
 Page and section headings establish hierarchy without eyebrow labels. Workflow step numbers, status badges, and artifact tags remain functional UI.
 

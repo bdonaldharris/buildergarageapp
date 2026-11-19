@@ -846,6 +846,17 @@ h1,h2,h3 {
   box-shadow: inset 4px 0 #0060c8;
 }
 
+.detail-placeholder {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 25px;
+}
+
+.detail-placeholder h2 {
+  font-size: 22px;
+}
+
 .detail-panel {
   min-width: 0;
 }

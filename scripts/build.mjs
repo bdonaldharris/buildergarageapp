@@ -68,10 +68,12 @@ const status = `<span class="status"><i></i> Foundation stage</span>`;
 const code = (value, title='') => `<div class="code">${title?`<b>${esc(title)}</b>`:''}<button class="copy" aria-label="Copy commands">Copy</button><pre>${esc(value)}</pre><span class="copy-live" aria-live="polite"></span></div>`;
 const pageHead = (title,lead,aside='') => `<section class="page-head"><div><h1>${title}</h1><p>${lead}</p></div>${aside}</section>`;
 function write(path, html) { const file = resolve(out, path, 'index.html'); mkdirSync(dirname(file), {recursive:true}); writeFileSync(file, openExternalLinks(html)); }
-const resourceIcon = type => type === 'cli'
-  ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3m6 0h4"/></svg>'
-  : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4.5 4.5 0 0 0-5.8 5.8l-5 5a2.1 2.1 0 0 0 3 3l5-5a4.5 4.5 0 0 0 5.8-5.8l-2.6 2.6-2.7-.7-.7-2.7z"/></svg>';
-const card = a => `<li><a class="resource" href="${a.url}"><span class="resource-icon">${resourceIcon(a.type)}</span><span class="resource-name">${esc(a.name)}</span></a></li>`;
+const resourceIcons = {
+  cli: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3m6 0h4"/>',
+  skills: '<path d="M14.7 6.3a4.5 4.5 0 0 0-5.8 5.8l-5 5a2.1 2.1 0 0 0 3 3l5-5a4.5 4.5 0 0 0 5.8-5.8l-2.6 2.6-2.7-.7-.7-2.7z"/>',
+  manuals: '<path d="M12 6c-2-2-5-2-9-1v14c4-1 7-1 9 1m0-14c2-2 5-2 9-1v14c-4-1-7-1-9 1m0-14v14"/>'
+};
+const resourceCard = (type, name) => `<li><a class="resource" href="library/?type=${type}"><span class="resource-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${resourceIcons[type]}</svg></span><span class="resource-name">${name}</span></a></li>`;
 const workflow = `<ol class="workflow"><li><b>01</b><h3>Discover</h3><p>Understand the system before changing it.</p></li><li><b>02</b><h3>Assess readiness</h3><p>Resolve material uncertainty deliberately.</p></li><li><b>03</b><h3>Implement</h3><p>Keep work scoped to the evidence.</p></li><li class="inspection"><b>04</b><h3>Inspect</h3><p>Independent review tests the real artifact.</p></li><li><b>05</b><h3>Ship</h3><p>Human authority remains with the maintainer.</p></li></ol>`;
 write('', layout({
   title: 'Build with AI agents. Keep the engineering.',
@@ -128,7 +130,7 @@ write('', layout({
     <section class="tray section">
       <div class="container">
         <h2>Resources</h2>
-        <ul class="resources">${artifacts.slice(0,5).map(card).join('')}</ul>
+        <ul class="resources">${[['cli', 'CLI'], ['skills', 'Skills'], ['manuals', 'Manuals']].map(([type, name]) => resourceCard(type, name)).join('')}</ul>
         <a class="button secondary ink" href="library/">View all resources</a>
       </div>
     </section>
@@ -153,13 +155,13 @@ function libraryPage(selected = null, detailOnly = false) {
     ? `<section class="detail-page"><a class="back" href="${depth}library/">← Back to Library</a>${detail}</section>`
     : `${pageHead('The parts bin', 'Find skills, technology manuals, and the CLI for your engineering workflow.', `<label class="search"><span class="sr">Search the library</span><input id="library-search" type="search" placeholder="Search the library"></label>`)}
       <section class="toolbar"><div class="tabs" aria-label="Artifact types">
-        <button data-type="all" class="active">All <small>${artifacts.length}</small></button>
-        ${['cli', 'skills', 'manuals'].map(type => `<button data-type="${type}">${({cli: 'CLI', skills: 'Skills', manuals: 'Manuals'})[type]} <small>${artifacts.filter(a => a.type === type).length}</small></button>`).join('')}
+        <button data-type="all" class="active" aria-pressed="true">All <small>${artifacts.length}</small></button>
+        ${['cli', 'skills', 'manuals'].map(type => `<button data-type="${type}" aria-pressed="false">${({cli: 'CLI', skills: 'Skills', manuals: 'Manuals'})[type]} <small>${artifacts.filter(a => a.type === type).length}</small></button>`).join('')}
       </div><button class="filter-toggle" aria-expanded="false">Filters</button></section>
       <section class="library">
         <aside class="filters"><fieldset><legend>Technician role</legend>${roles.map(role => `<label><input type="checkbox" name="role" value="${esc(role)}"> ${esc(role)}</label>`).join('')}</fieldset></aside>
         <div><p id="result-count" aria-live="polite">${artifacts.length} parts</p>${list}<p class="empty" hidden>No parts match. <button class="clear">Clear filters</button></p></div>
-        <aside class="detail-panel">${detail}</aside>
+        <aside class="detail-panel">${detail}<div class="detail-placeholder" hidden><h2>Select a resource</h2><p>Choose a resource from the list to view its details.</p></div></aside>
       </section>`;
   return layout({ title: detailOnly ? selectedArtifact.name : 'Library', description: 'Builder Garage artifacts generated from the pinned framework source.', current: 'library/', depth, body });
 }

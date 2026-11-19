@@ -72,10 +72,10 @@ const home = readFileSync(resolve(dist, 'index.html'), 'utf8');
 assert.match(home, /<span class="status"><i><\/i> Foundation stage<\/span>/);
 const homeResources = home.match(/<ul class="resources">[\s\S]*?<\/ul>/)?.[0];
 assert.ok(home.includes('<h2>Resources</h2>') && homeResources, 'Homepage has a Resources section');
-for (const artifact of catalog.artifacts.slice(0, 5)) {
-  assert.ok(homeResources.includes(`href="${artifact.url}"`) && homeResources.includes(artifact.name), `Homepage links to ${artifact.name}`);
-  assert.ok(!homeResources.includes(artifact.summary), `Homepage omits the detailed summary for ${artifact.name}`);
+for (const [type, name] of [['cli', 'CLI'], ['skills', 'Skills'], ['manuals', 'Manuals']]) {
+  assert.ok(homeResources.includes(`href="library/?type=${type}"`) && homeResources.includes(`>${name}</span>`), `Homepage links to ${name} category`);
 }
+assert.equal([...homeResources.matchAll(/class="resource"/g)].length, 3, 'Homepage has exactly three resource categories');
 assert.ok(!home.includes('Current source revision'));
 assert.ok(!library.includes('Generated from Builder Garage') && !library.includes('Built from'));
 const gettingStarted = readFileSync(resolve(dist, 'get-started/index.html'), 'utf8');
