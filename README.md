@@ -27,7 +27,7 @@ The current verified source snapshot is `v0.1.1` (`7c062921a2f2c380da1031fad1e60
 
 ## CLI releases
 
-The download page reads `release.json`, a checked-in manifest of the latest stable CLI release, its tagged commit, and GitHub asset URLs. Run `node scripts/update-release.mjs` to refresh it from the GitHub API; use `GITHUB_TOKEN` if unauthenticated API limits are a concern. The updater refuses missing archives, checksum/signature assets, incomplete package sets, or invalid asset URLs rather than publishing partial downloads. The manifest does not update the separate `framework-source.json` pin. Check the linked release notes for platform signing status; the manifest does not infer signing.
+The download page reads `release.json`, a checked-in manifest of the latest stable CLI release, its tagged commit, and GitHub asset URLs. Run `node scripts/update-release.mjs` to refresh it from the GitHub API; use `GITHUB_TOKEN` if unauthenticated API limits are a concern. The updater refuses missing archives, checksum/signature assets, incomplete package sets, or invalid asset URLs rather than publishing partial downloads. The manifest does not update the separate `framework-source.json` pin. Check the linked release notes for macOS signing and notarization status; the manifest does not infer signing.
 
 The download page presents operating systems as selectable controls, defaulting to a detected desktop OS when possible. All downloads remain visible when the OS is unknown or JavaScript is unavailable.
 

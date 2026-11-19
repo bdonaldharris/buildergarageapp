@@ -31,6 +31,7 @@ for (const [path, html] of pages) {
   const githubCTA = html.match(/<a class="github"[^>]*>/)?.[0];
   assert.ok(githubCTA?.includes('target="_blank"') && githubCTA.includes('rel="noopener noreferrer"') && githubCTA.includes('aria-label="GitHub (opens in a new tab)"'), `GitHub CTA opens a safe, announced new tab: ${path}`);
   assert.ok(!/\bclass="[^"]*\beyebrow\b/.test(html), `Page omits eyebrow labels: ${path}`);
+  assert.doesNotMatch(html, /\b(?:SignPath|Authenticode|SmartScreen)\b|\bWindows code-signing\b/i, `Page omits Windows signing copy: ${path}`);
   const footer = html.match(/<footer>[\s\S]*?<\/footer>/)?.[0];
   assert.ok(footer?.includes('>Source details</a>'), `Footer links to source details: ${path}`);
   assert.match(footer, /<a href="[^"]*privacy\/">Privacy<\/a>/, `Footer links to privacy policy: ${path}`);
@@ -100,13 +101,12 @@ for (const page of ['download/index.html', 'learn/build-from-source/index.html']
   assert.ok(!/no release is published yet|none is published yet|first published release will be|not a published binary release|published binary releases and installation packages do not|release automation are not available yet/i.test(html), `Release availability is current: ${page}`);
 }
 for (const html of [gettingStarted, updates, readFileSync(resolve(dist, 'library/cli/garage/index.html'), 'utf8'), readFileSync(resolve(dist, 'download/index.html'), 'utf8')]) {
-  assert.ok(html.includes('Gatekeeper') && html.includes('SmartScreen'), 'Binary guidance discloses platform trust limitations');
+  assert.ok(html.includes('Gatekeeper'), 'Binary guidance discloses macOS trust limitations');
   assert.ok(html.includes('docs/release-verification.md'), 'Binary guidance links to verification instructions');
 }
 const download = readFileSync(resolve(dist, 'download/index.html'), 'utf8');
 assert.ok(download.includes('<fieldset class="os-selector" hidden>') && !download.includes('id="download-os"'), 'OS choices are enhanced without hiding downloads when JavaScript is unavailable');
 for (const asset of release.assets) assert.ok(download.includes(`href="${asset.url}"`), `Download page links to ${asset.name}`);
-assert.ok(download.includes('signpath.io') && download.includes('signpath.org'), 'Windows signing acknowledgment is present');
 assert.ok(download.includes(release.revision.slice(0, 7)) && download.includes(sha.slice(0, 7)), 'Release and source revisions are distinct');
 
 const fontStylesheet = resolve(dist, 'assets/fonts/fonts.css');

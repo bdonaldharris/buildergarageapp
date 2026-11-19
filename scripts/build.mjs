@@ -18,7 +18,7 @@ const releaseUrl = `${repo}/releases/tag/${releaseVersion}`;
 const releaseVerification = `${repo}/blob/${releaseVersion}/docs/release-verification.md`;
 const releaseInfo = `<p><a href="/download/">Download garage ${releaseVersion}</a> for macOS, Linux, or Windows on amd64 and arm64. Prebuilt executables do not require Go.</p>
   <p>Verify the signed checksum manifest and your archive's checksum before running it; GitHub artifact attestations are also available. Follow <a href="${releaseVerification}">release verification and terminal extraction instructions ↗</a>.</p>
-  <p class="callout">Check the <a href="${releaseUrl}">release notes</a> for current platform signing status. Gatekeeper or SmartScreen warnings may appear. Integrity and provenance verification do not replace operating-system publisher trust.</p>`;
+  <p class="callout">On macOS, Gatekeeper restrictions may apply. Check the <a href="${releaseUrl}">release notes</a> for macOS signing and notarization status. Integrity and provenance verification do not replace operating-system publisher trust.</p>`;
 const text = p => readFileSync(resolve(source, p), 'utf8');
 const goVersion = text('go.mod').match(/^go (\S+)$/m)?.[1];
 if (!goVersion) throw new Error('Framework go.mod is missing its Go version.');
@@ -232,7 +232,6 @@ write('download', layout({
       <p>Choose your processor architecture; if unsure, check your system settings. Select a different operating system if downloading for another computer.</p>
       <section class="download-platform" data-platform="windows"><h2>Windows</h2>
         <div class="download-links">${downloadLink(`garage_${releaseNumber}_windows_amd64.zip`, 'Windows · x64 (.zip)')}${downloadLink(`garage_${releaseNumber}_windows_arm64.zip`, 'Windows · ARM64 (.zip)')}</div>
-        <p>Windows code-signing acknowledgment: <a href="https://signpath.io/">SignPath.io</a> and <a href="https://signpath.org/">SignPath Foundation</a>. Consult the <a href="${releaseUrl}">release notes</a> to confirm whether this release is signed; unsigned binaries may trigger SmartScreen warnings.</p>
       </section>
       <section class="download-platform" data-platform="macos"><h2>macOS</h2>
         <div class="download-links">${downloadLink(`garage_${releaseNumber}_darwin_arm64.tar.gz`, 'macOS · Apple silicon (.tar.gz)')}${downloadLink(`garage_${releaseNumber}_darwin_amd64.tar.gz`, 'macOS · Intel (.tar.gz)')}</div>
@@ -322,12 +321,14 @@ for (const [guideSlug, guideTitle, guidePath] of guideFiles) {
     markdown = markdown
       .replace('; no release is published yet.', `; [${releaseVersion}](${releaseUrl}) is now published.`)
       .replace('and the first published release will be `v0.1.1` ([ADR 0003](docs/adr/0003-release-distribution.md)); none is published yet.', `and [v0.1.1](${repo}/releases/tag/v0.1.1) was the first published release ([ADR 0003](docs/adr/0003-release-distribution.md)).`)
-      .replace(/^- No release is published yet\..*$/m, `- [${releaseVersion}](${releaseUrl}) provides prebuilt CLI archives for macOS, Linux, and Windows on amd64 and arm64. Verify the signed checksum manifest and archive checksum before running a binary; see [Verifying a release](${releaseVerification}). Source installation with [\`install.sh\`](#install-from-source) remains available on macOS and Linux.`);
+      .replace(/^- No release is published yet\..*$/m, `- [${releaseVersion}](${releaseUrl}) provides prebuilt CLI archives for macOS, Linux, and Windows on amd64 and arm64. Verify the signed checksum manifest and archive checksum before running a binary; see [Verifying a release](${releaseVerification}). Source installation with [\`install.sh\`](#install-from-source) remains available on macOS and Linux.`)
+      .replace(/^- macOS executables are not yet Developer ID signed.*$/m, `- On macOS, Gatekeeper restrictions may apply. Check the [release notes](${releaseUrl}) for macOS signing and notarization status.`)
+      .replace(/^- Native packages, package-manager channels, and release installers are later tracks.*\r?\n/m, '');
   }
   const body = renderMarkdown(markdown, { source, repo, sha, path: guidePath });
   write(`learn/${guideSlug}`, layout({
     title: guideTitle, description: `Builder Garage guide: ${guideTitle}.`, current: 'learn/', depth: '../../',
-    body: `<article class="article"><a class="back" href="../">← Learn</a><h1>${esc(guideTitle)}</h1><p><a href="${repo}/blob/${sha}/${guidePath}">View source ↗</a></p>${guidePath === 'README.md' ? `<p class="callout">This guide reflects the ${esc(version)} source snapshot, which predates its release. For current downloads and signing status, see <a href="../../download/">Download the CLI</a>.</p>` : ''}<div class="reading">${body}</div></article>`
+    body: `<article class="article"><a class="back" href="../">← Learn</a><h1>${esc(guideTitle)}</h1><p><a href="${repo}/blob/${sha}/${guidePath}">View source ↗</a></p>${guidePath === 'README.md' ? `<p class="callout">This guide reflects the ${esc(version)} source snapshot, which predates its release. For current downloads, see <a href="../../download/">Download the CLI</a>.</p>` : ''}<div class="reading">${body}</div></article>`
   }));
 }
 write('updates', layout({
