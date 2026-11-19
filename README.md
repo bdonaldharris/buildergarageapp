@@ -29,6 +29,8 @@ The current verified source snapshot is `v0.1.1` (`7c062921a2f2c380da1031fad1e60
 
 The download page reads `release.json`, a checked-in manifest of the latest stable CLI release, its tagged commit, and GitHub asset URLs. Run `node scripts/update-release.mjs` to refresh it from the GitHub API; use `GITHUB_TOKEN` if unauthenticated API limits are a concern. The updater refuses missing archives, checksum/signature assets, incomplete package sets, or invalid asset URLs rather than publishing partial downloads. The manifest does not update the separate `framework-source.json` pin. Check the linked release notes for platform signing status; the manifest does not infer signing.
 
+The download page presents operating systems as selectable controls, defaulting to a detected desktop OS when possible. All downloads remain visible when the OS is unknown or JavaScript is unavailable.
+
 `.github/workflows/update-release.yml` runs daily at 06:17 UTC and can also be started manually. When the release changes, it validates the site, commits the manifest and tracked generated output, and pushes to `main`, allowing the Vercel Git integration to deploy. It requires Actions `contents: write` permission and a branch that permits the workflow token to push. GitHub schedules are best effort; API, validation, push, or deployment failures require attention in the Actions or Vercel dashboard. A GitHub Actions bot push must be accepted by the connected Vercel project.
 
 Run `npm run check` before publishing. It checks Markdown rendering, generated links and fragments, source references, fonts, catalog metadata, and the contents of downloads against the selected framework snapshot.
@@ -39,7 +41,7 @@ Edit `site.css` for the sectioned stylesheet, `site.js` for interactions, and `s
 
 Brand images and self-hosted Latin-subset Archivo, Inter, and JetBrains Mono fonts live in `assets/` and are copied into each build. Font faces use `font-display: swap`; the display and body faces used above the fold are preloaded. Font licenses are included in `assets/fonts/OFL-*.txt`. No external font service or temporary handoff directory is required.
 
-The homepage leads with a prominent centered logo above the headline and copyable source-build snippet, followed by a five-step workflow. Open shop-floor columns and ruled adoption paths distinguish those sections from the Library's resource cards.
+The homepage leads with a prominent centered logo above the headline and copyable source-build snippet, followed by a five-step workflow. Open shop-floor columns and ruled adoption paths lead to compact resource links; detailed descriptions remain in the Library.
 
 Page and section headings establish hierarchy without eyebrow labels. Workflow step numbers, status badges, and artifact tags remain functional UI.
 

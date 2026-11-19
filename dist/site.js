@@ -49,21 +49,28 @@
     });
   });
 
-  const osSelect = document.querySelector('#download-os');
-  if (osSelect) {
+  const osSelector = document.querySelector('.os-selector');
+  if (osSelector) {
+    const options = [...osSelector.querySelectorAll('input[name=download-os]')];
     const platforms = [...document.querySelectorAll('.download-platform')];
     function showPlatform() {
-      platforms.forEach(panel => panel.hidden = osSelect.value !== 'all' && panel.dataset.platform !== osSelect.value);
+      const selected = options.find(option => option.checked).value;
+      platforms.forEach(panel => panel.hidden = selected !== 'all' && panel.dataset.platform !== selected);
     }
     const userAgent = navigator.userAgent || '';
     const platform = navigator.userAgentData?.platform || navigator.platform || '';
+    let detected = 'all';
     if (!/android|iphone|ipad|ipod/i.test(`${platform} ${userAgent}`)) {
-      if (/windows|win32|win64/i.test(platform)) osSelect.value = 'windows';
-      else if (/mac/i.test(platform) && !(navigator.maxTouchPoints > 1 && /mac/i.test(platform))) osSelect.value = 'macos';
-      else if (/linux/i.test(platform)) osSelect.value = 'linux';
+      if (/windows|win32|win64/i.test(platform)) detected = 'windows';
+      else if (/mac/i.test(platform) && !(navigator.maxTouchPoints > 1 && /mac/i.test(platform))) detected = 'macos';
+      else if (/linux/i.test(platform)) detected = 'linux';
     }
-    osSelect.addEventListener('change', showPlatform);
+    options.forEach(option => {
+      option.checked = option.value === detected;
+      option.addEventListener('change', showPlatform);
+    });
     showPlatform();
+    osSelector.hidden = false;
   }
 
   const search = document.querySelector('#library-search');

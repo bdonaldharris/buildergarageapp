@@ -68,7 +68,10 @@ const status = `<span class="status"><i></i> Foundation stage</span>`;
 const code = (value, title='') => `<div class="code">${title?`<b>${esc(title)}</b>`:''}<button class="copy" aria-label="Copy commands">Copy</button><pre>${esc(value)}</pre><span class="copy-live" aria-live="polite"></span></div>`;
 const pageHead = (title,lead,aside='') => `<section class="page-head"><div><h1>${title}</h1><p>${lead}</p></div>${aside}</section>`;
 function write(path, html) { const file = resolve(out, path, 'index.html'); mkdirSync(dirname(file), {recursive:true}); writeFileSync(file, openExternalLinks(html)); }
-const card = a => `<article class="resource"><div><span class="tag">${a.type === 'skills' ? 'SKILL' : a.type === 'manuals' ? 'MANUAL' : 'CLI'}</span>${a.role!=='foundation'?` <span class="tag blue">${esc(a.role)}</span>`:''}</div><h3><a href="${a.url}">${esc(a.name)}</a></h3><p>${esc(a.summary)}</p><a href="${a.url}">View details →</a></article>`;
+const resourceIcon = type => type === 'cli'
+  ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3m6 0h4"/></svg>'
+  : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4.5 4.5 0 0 0-5.8 5.8l-5 5a2.1 2.1 0 0 0 3 3l5-5a4.5 4.5 0 0 0 5.8-5.8l-2.6 2.6-2.7-.7-.7-2.7z"/></svg>';
+const card = a => `<li><a class="resource" href="${a.url}"><span class="resource-icon">${resourceIcon(a.type)}</span><span class="resource-name">${esc(a.name)}</span></a></li>`;
 const workflow = `<ol class="workflow"><li><b>01</b><h3>Discover</h3><p>Understand the system before changing it.</p></li><li><b>02</b><h3>Assess readiness</h3><p>Resolve material uncertainty deliberately.</p></li><li><b>03</b><h3>Implement</h3><p>Keep work scoped to the evidence.</p></li><li class="inspection"><b>04</b><h3>Inspect</h3><p>Independent review tests the real artifact.</p></li><li><b>05</b><h3>Ship</h3><p>Human authority remains with the maintainer.</p></li></ol>`;
 write('', layout({
   title: 'Build with AI agents. Keep the engineering.',
@@ -124,8 +127,8 @@ write('', layout({
     </section>
     <section class="tray section">
       <div class="container">
-        <h2>Parts you can inspect.</h2>
-        <div class="resources">${artifacts.slice(0,5).map(card).join('')}</div>
+        <h2>Resources</h2>
+        <ul class="resources">${artifacts.slice(0,5).map(card).join('')}</ul>
         <a class="button secondary ink" href="library/">View all resources</a>
       </div>
     </section>
@@ -215,8 +218,15 @@ write('download', layout({
   body: `${pageHead('Download the CLI.', `Choose an operating system and architecture for garage ${esc(releaseVersion)}.`)}
     <section class="content download-page">
       <p>Prebuilt executables run without Go. Downloads come from the <a href="${releaseUrl}">${esc(releaseVersion)} GitHub release</a>.</p>
-      <label for="download-os">Operating system</label>
-      <select id="download-os"><option value="all">All operating systems</option><option value="windows">Windows</option><option value="macos">macOS</option><option value="linux">Linux</option></select>
+      <fieldset class="os-selector" hidden>
+        <legend>Operating system</legend>
+        <div class="os-options">
+          <label><input type="radio" name="download-os" value="windows"><span>Windows</span></label>
+          <label><input type="radio" name="download-os" value="macos"><span>macOS</span></label>
+          <label><input type="radio" name="download-os" value="linux"><span>Linux</span></label>
+          <label><input type="radio" name="download-os" value="all" checked><span>All systems</span></label>
+        </div>
+      </fieldset>
       <p>Choose your processor architecture; if unsure, check your system settings. Select a different operating system if downloading for another computer.</p>
       <section class="download-platform" data-platform="windows"><h2>Windows</h2>
         <div class="download-links">${downloadLink(`garage_${releaseNumber}_windows_amd64.zip`, 'Windows · x64 (.zip)')}${downloadLink(`garage_${releaseNumber}_windows_arm64.zip`, 'Windows · ARM64 (.zip)')}</div>

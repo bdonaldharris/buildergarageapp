@@ -566,28 +566,50 @@ h1,h2,h3 {
 
 .resources {
   display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  grid-template-columns: repeat(auto-fit,minmax(min(100%, 300px),1fr));
   gap: 14px;
   margin: 28px 0;
+  padding: 0;
+  list-style: none;
 }
 
 .resource {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   background: #fff;
   border: 1px solid var(--border);
-  padding: 18px;
   border-radius: 10px;
+  min-height: 88px;
+  height: 100%;
+  padding: 18px;
+  color: var(--ink);
+  text-decoration: none;
 }
 
-.resource h3 {
-  font: 600 15px var(--mono);
-  margin: 15px 0 7px;
+.resource:hover {
+  border-color: var(--blue);
+}
+
+.resource-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: #e1ecfa;
+  color: var(--blue);
+}
+
+.resource-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.resource-name {
+  min-width: 0;
+  font: 600 14px/1.5 var(--mono);
   overflow-wrap: anywhere;
-}
-
-.resource p {
-  font-size: 14px;
-  color: var(--muted);
-  min-height: 68px;
 }
 
 .tag {
@@ -618,20 +640,58 @@ h1,h2,h3 {
 }
 
 /* Interior page headers */
-.download-page label {
-  display: block;
-  font-weight: 700;
+.os-selector {
+  border: 0;
+  padding: 0;
+  margin: 24px 0;
 }
 
-.download-page select {
-  font: inherit;
+.os-selector legend {
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.os-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.os-options label {
+  position: relative;
+}
+
+.os-options input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.os-options span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 44px;
-  width: min(100%, 300px);
-  padding: 8px;
+  padding: 9px 18px;
   border: 1px solid var(--muted);
-  border-radius: 6px;
+  border-radius: 8px;
   background: white;
   color: var(--ink);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.os-options input:checked + span {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: white;
+  box-shadow: inset 0 -3px 0 var(--signal);
+}
+
+.os-options input:focus-visible + span {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
 }
 
 .download-platform {

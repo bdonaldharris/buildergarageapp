@@ -70,6 +70,12 @@ for (const [path, html] of pages) {
 
 const home = readFileSync(resolve(dist, 'index.html'), 'utf8');
 assert.match(home, /<span class="status"><i><\/i> Foundation stage<\/span>/);
+const homeResources = home.match(/<ul class="resources">[\s\S]*?<\/ul>/)?.[0];
+assert.ok(home.includes('<h2>Resources</h2>') && homeResources, 'Homepage has a Resources section');
+for (const artifact of catalog.artifacts.slice(0, 5)) {
+  assert.ok(homeResources.includes(`href="${artifact.url}"`) && homeResources.includes(artifact.name), `Homepage links to ${artifact.name}`);
+  assert.ok(!homeResources.includes(artifact.summary), `Homepage omits the detailed summary for ${artifact.name}`);
+}
 assert.ok(!home.includes('Current source revision'));
 assert.ok(!library.includes('Generated from Builder Garage') && !library.includes('Built from'));
 const gettingStarted = readFileSync(resolve(dist, 'get-started/index.html'), 'utf8');
@@ -98,6 +104,7 @@ for (const html of [gettingStarted, updates, readFileSync(resolve(dist, 'library
   assert.ok(html.includes('docs/release-verification.md'), 'Binary guidance links to verification instructions');
 }
 const download = readFileSync(resolve(dist, 'download/index.html'), 'utf8');
+assert.ok(download.includes('<fieldset class="os-selector" hidden>') && !download.includes('id="download-os"'), 'OS choices are enhanced without hiding downloads when JavaScript is unavailable');
 for (const asset of release.assets) assert.ok(download.includes(`href="${asset.url}"`), `Download page links to ${asset.name}`);
 assert.ok(download.includes('signpath.io') && download.includes('signpath.org'), 'Windows signing acknowledgment is present');
 assert.ok(download.includes(release.revision.slice(0, 7)) && download.includes(sha.slice(0, 7)), 'Release and source revisions are distinct');
