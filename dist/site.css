@@ -759,7 +759,7 @@ h1,h2,h3 {
   margin: auto;
   padding: 24px 32px 68px;
   display: grid;
-  grid-template-columns: 180px minmax(280px,1fr) minmax(360px,1.2fr);
+  grid-template-columns: 180px minmax(0,1fr);
   gap: 18px;
 }
 
@@ -814,26 +814,6 @@ h1,h2,h3 {
 .resource-row em {
   font: 11px var(--mono);
   font-style: normal;
-}
-
-.resource-row.selected {
-  background: #e1ecfa;
-  box-shadow: inset 4px 0 #0060c8;
-}
-
-.detail-placeholder {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 25px;
-}
-
-.detail-placeholder h2 {
-  font-size: 22px;
-}
-
-.detail-panel {
-  min-width: 0;
 }
 
 /* Artifact details */
@@ -1203,12 +1183,6 @@ footer nav {
   }
   .menu {
     display: block;
-  }
-  .library {
-    grid-template-columns: 180px 1fr;
-  }
-  .detail-panel {
-    display: none;
   }
   .workflow {
     grid-template-columns: repeat(3,1fr);

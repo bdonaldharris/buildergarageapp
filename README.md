@@ -47,6 +47,8 @@ The homepage leads with a prominent centered logo above the headline and copyabl
 
 Page and section headings establish hierarchy without eyebrow labels. Workflow step numbers, status badges, and artifact tags remain functional UI.
 
+The Library is a searchable, filterable resource list. CLI, skill, and manual rows all open their own detail page in the same tab.
+
 External web links, including links in source-backed guides, open in a new tab with `noopener noreferrer`. Internal links, downloads, and email links retain their normal behavior.
 
 The footer links to a website privacy policy generated in `scripts/build.mjs`. Review it whenever hosting, analytics, browser-side behavior, or the privacy contact changes.

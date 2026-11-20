@@ -79,6 +79,7 @@ for (const [type, name] of [['cli', 'CLI'], ['skills', 'Skills'], ['manuals', 'M
 assert.equal([...homeResources.matchAll(/class="resource"/g)].length, 3, 'Homepage has exactly three resource categories');
 assert.ok(!home.includes('Current source revision'));
 assert.ok(!library.includes('Generated from Builder Garage') && !library.includes('Built from'));
+assert.doesNotMatch(library, /class="(?:artifact|detail-panel|detail-placeholder)\b|class="resource-row selected"/, 'The Library has no inline details or preselected resource');
 const gettingStarted = readFileSync(resolve(dist, 'get-started/index.html'), 'utf8');
 assert.ok(!gettingStarted.includes('Verified against'));
 const learn = readFileSync(resolve(dist, 'learn/index.html'), 'utf8');
@@ -129,9 +130,11 @@ const sourceSkills = readdirSync(resolve(source, 'skills')).filter(name => exist
 const sourceManuals = readdirSync(resolve(source, 'manuals')).filter(name => name.endsWith('.md') && name !== 'README.md');
 assert.equal(catalog.artifacts.filter(a => a.type === 'skills').length, sourceSkills.length);
 assert.equal(catalog.artifacts.filter(a => a.type === 'manuals').length, sourceManuals.length);
+const resourceLinks = new Set([...library.matchAll(/<a class="resource-row"[^>]*\bhref="([^"]+)"/g)].map(([, href]) => href));
+assert.equal(resourceLinks.size, catalog.artifacts.length, 'The Library links to a detail page for each resource');
 for (const artifact of catalog.artifacts) {
   assert.ok(existsSync(resolve(source, artifact.path)), `Artifact source exists: ${artifact.path}`);
-  assert.ok(library.includes(`href="${artifact.url}"`), `Artifact is listed: ${artifact.name}`);
+  assert.ok(resourceLinks.has(artifact.url), `Resource row links to the detail page: ${artifact.name}`);
   const detail = readFileSync(resolve(dist, '.' + artifact.url, 'index.html'), 'utf8');
   const technical = detail.match(/<details class="technical-details">[\s\S]*?<\/details>/)?.[0];
   assert.ok(technical?.includes('<dt>Source revision</dt>'), `Revision is collapsed by default: ${artifact.name}`);

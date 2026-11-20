@@ -80,9 +80,6 @@
   const filters = [...document.querySelectorAll('.filters input')];
   const tabs = [...document.querySelectorAll('.tabs button')];
   const empty = document.querySelector('.empty');
-  const selectedRow = rows.find(row => row.classList.contains('selected'));
-  const detail = document.querySelector('.detail-panel .artifact');
-  const detailPlaceholder = document.querySelector('.detail-placeholder');
   const initial = new URLSearchParams(location.search);
   let type = tabs.some(tab => tab.dataset.type === initial.get('type')) ? initial.get('type') : 'all';
   search.value = initial.get('q') || '';
@@ -106,10 +103,6 @@
       tab.classList.toggle('active', active);
       tab.setAttribute('aria-pressed', active);
     });
-    if (selectedRow && detail && detailPlaceholder) {
-      detail.hidden = selectedRow.hidden;
-      detailPlaceholder.hidden = !selectedRow.hidden;
-    }
     const params = new URLSearchParams();
     if (query) params.set('q', query);
     if (type !== 'all') params.set('type', type);

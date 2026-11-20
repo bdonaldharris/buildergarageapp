@@ -144,18 +144,13 @@ write('', layout({
     </section>`
 }));
 
-function libraryPage(selected = null, detailOnly = false) {
-  const depth = detailOnly ? '../../../' : '../';
-  const selectedArtifact = selected || cli;
+function libraryPage() {
   const list = `<div class="library-list">${artifacts.map(a => `
-    <a class="resource-row ${a.name === selectedArtifact.name ? 'selected' : ''}" data-type="${a.type}" data-role="${esc(a.type === 'skills' ? a.role : '')}" href="${a.url}">
+    <a class="resource-row" data-type="${a.type}" data-role="${esc(a.type === 'skills' ? a.role : '')}" href="${a.url}">
       <span aria-hidden="true">${a.type === 'cli' ? '⌘' : '▣'}</span><strong>${esc(a.name)}</strong>
       <small>${esc(a.alias)} · ${esc(a.summary)}</small><em>${artifactLabel(a)}</em>
     </a>`).join('')}</div>`;
-  const detail = artifactDetail(selectedArtifact, depth);
-  const body = detailOnly
-    ? `<section class="detail-page"><a class="back" href="${depth}library/">← Back to Library</a>${detail}</section>`
-    : `${pageHead('The parts bin', 'Find skills, technology manuals, and the CLI for your engineering workflow.', `<label class="search"><span class="sr">Search the library</span><input id="library-search" type="search" placeholder="Search the library"></label>`)}
+  const body = `${pageHead('The parts bin', 'Find skills, technology manuals, and the CLI for your engineering workflow.', `<label class="search"><span class="sr">Search the library</span><input id="library-search" type="search" placeholder="Search the library"></label>`)}
       <section class="toolbar"><div class="tabs" aria-label="Artifact types">
         <button data-type="all" class="active" aria-pressed="true">All <small>${artifacts.length}</small></button>
         ${['cli', 'skills', 'manuals'].map(type => `<button data-type="${type}" aria-pressed="false">${({cli: 'CLI', skills: 'Skills', manuals: 'Manuals'})[type]} <small>${artifacts.filter(a => a.type === type).length}</small></button>`).join('')}
@@ -163,9 +158,8 @@ function libraryPage(selected = null, detailOnly = false) {
       <section class="library">
         <aside class="filters"><fieldset><legend>Technician role</legend>${roles.map(role => `<label><input type="checkbox" name="role" value="${esc(role)}"> ${esc(role)}</label>`).join('')}</fieldset></aside>
         <div><p id="result-count" aria-live="polite">${artifacts.length} parts</p>${list}<p class="empty" hidden>No parts match. <button class="clear">Clear filters</button></p></div>
-        <aside class="detail-panel">${detail}<div class="detail-placeholder" hidden><h2>Select a resource</h2><p>Choose a resource from the list to view its details.</p></div></aside>
       </section>`;
-  return layout({ title: detailOnly ? selectedArtifact.name : 'Library', description: 'Builder Garage artifacts generated from the pinned framework source.', current: 'library/', depth, body });
+  return layout({ title: 'Library', description: 'Builder Garage artifacts generated from the pinned framework source.', current: 'library/', depth: '../', body });
 }
 
 function artifactDetail(a, depth = '') {
@@ -210,7 +204,14 @@ function artifactDetail(a, depth = '') {
     </div>
   </article>`;
 }
-write('library', libraryPage()); for (const a of artifacts) write(`library/${a.type}/${a.name}`, libraryPage(a, true));
+write('library', libraryPage());
+for (const a of artifacts) {
+  const depth = '../../../';
+  write(`library/${a.type}/${a.name}`, layout({
+    title: a.name, description: 'Builder Garage artifacts generated from the pinned framework source.', current: 'library/', depth,
+    body: `<section class="detail-page"><a class="back" href="${depth}library/">← Back to Library</a>${artifactDetail(a, depth)}</section>`
+  }));
+}
 
 const releaseAsset = name => release.assets.find(asset => asset.name === name);
 const releaseNumber = releaseVersion.slice(1);

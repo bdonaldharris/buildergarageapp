@@ -3,10 +3,9 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { runInNewContext } from 'node:vm';
 
-function library(type) {
+function library(params) {
   const rows = ['cli', 'skills', 'manuals'].map(value => ({
-    dataset: { type: value, role: '' }, textContent: value, hidden: false,
-    classList: { contains: name => name === 'selected' && value === 'cli' }
+    dataset: { type: value, role: value === 'skills' ? 'planner' : '' }, textContent: value, hidden: false
   }));
   const tabs = ['all', 'cli', 'skills', 'manuals'].map(value => ({
     dataset: { type: value }, classList: { toggle(name, active) { this.active = active; } },
@@ -14,36 +13,39 @@ function library(type) {
     addEventListener(name, callback) { this.click = callback; }
   }));
   const search = { value: '', addEventListener() {} };
-  const count = {}, empty = {}, detail = {}, placeholder = {};
+  const count = {}, empty = {};
+  const filters = [{ value: 'planner', addEventListener() {} }];
   const button = { addEventListener() {} };
   const document = {
     querySelector(selector) {
       return ({
         '#library-search': search, '#result-count': count, '.empty': empty,
-        '.detail-panel .artifact': detail, '.detail-placeholder': placeholder,
         '.clear': button, '.filter-toggle': button
       })[selector] || null;
     },
     querySelectorAll(selector) {
-      return ({ '.resource-row': rows, '.tabs button': tabs })[selector] || [];
+      return ({ '.resource-row': rows, '.tabs button': tabs, '.filters input': filters })[selector] || [];
     }
   };
   runInNewContext(readFileSync('site.js', 'utf8'), {
-    document, URLSearchParams, location: { search: `?type=${type}`, pathname: '/library/' },
+    document, URLSearchParams, location: { search: params, pathname: '/library/' },
     history: { replaceState() {} }
   });
-  return { rows, tabs, detail, placeholder };
+  return { rows, tabs, filters };
 }
 
-test('category links restore the correct filter and do not show unrelated CLI details', () => {
+test('category links restore the correct filter in the standalone resource list', () => {
   for (const type of ['cli', 'skills', 'manuals']) {
-    const { rows, tabs, detail, placeholder } = library(type);
+    const { rows, tabs } = library(`?type=${type}`);
     assert.deepEqual(rows.filter(row => !row.hidden).map(row => row.dataset.type), [type]);
     assert.equal(tabs.find(tab => tab.dataset.type === type)['aria-pressed'], 'true');
-    assert.equal(detail.hidden, type !== 'cli');
-    assert.equal(placeholder.hidden, type === 'cli');
     tabs.find(tab => tab.dataset.type === 'all').click();
-    assert.equal(detail.hidden, false);
-    assert.equal(placeholder.hidden, true);
+    assert.ok(rows.every(row => !row.hidden));
   }
+});
+
+test('a saved Technician role filter restores matching resources', () => {
+  const { rows, filters } = library('?role=planner');
+  assert.equal(filters[0].checked, true);
+  assert.deepEqual(rows.filter(row => !row.hidden).map(row => row.dataset.type), ['skills']);
 });
