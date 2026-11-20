@@ -70,7 +70,7 @@ for (const [path, html] of pages) {
 }
 
 const home = readFileSync(resolve(dist, 'index.html'), 'utf8');
-assert.match(home, /<span class="status"><i><\/i> Foundation stage<\/span>/);
+assert.doesNotMatch(home, /\bfoundation stage\b/i, 'Homepage omits the Foundation stage badge');
 const homeResources = home.match(/<ul class="resources">[\s\S]*?<\/ul>/)?.[0];
 assert.ok(home.includes('<h2>Resources</h2>') && homeResources, 'Homepage has a Resources section');
 for (const [type, name] of [['cli', 'CLI'], ['skills', 'Skills'], ['manuals', 'Manuals']]) {

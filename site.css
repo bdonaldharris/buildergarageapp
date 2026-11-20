@@ -130,24 +130,6 @@ h1,h2,h3 {
   margin: 0 0 16px;
 }
 
-.status {
-  font: 12px var(--mono);
-  border: 1px solid #4A5568;
-  padding: 7px 12px;
-  border-radius: 99px;
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.status i {
-  width: 8px;
-  height: 8px;
-  background: var(--amber);
-  display: block;
-  flex-shrink: 0;
-}
-
 .actions {
   display: flex!important;
   gap: 12px;
@@ -263,13 +245,6 @@ h1,h2,h3 {
 .hero-copy,
 .hero-install {
   min-width: 0;
-}
-
-.hero .status {
-  margin-bottom: 32px;
-  border-color: #364152;
-  border-radius: 6px;
-  line-height: 1.6;
 }
 
 .hero h1 {
