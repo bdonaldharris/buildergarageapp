@@ -1,13 +1,14 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Builder Garage guide: Project configuration."><meta property="og:title" content="Project configuration"><meta property="og:description" content="Builder Garage guide: Project configuration."><meta property="og:image" content="../../assets/workshop.png"><title>Project configuration · Builder Garage</title><link rel="preload" href="../../assets/fonts/archivo-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="../../assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="../../assets/fonts/fonts.css"><link rel="stylesheet" href="../../site.css"></head><body><a class="skip" href="#main">Skip to content</a><header><a class="brand" href="/"><img src="../../assets/logo.png" alt="Builder Garage"></a><button class="menu" aria-label="Open navigation" aria-controls="site-nav" aria-expanded="false">Menu</button><nav id="site-nav" aria-label="Primary"><a  href="../../how-it-works/">How it works</a><a  href="../../get-started/">Get Started</a><a  href="../../library/">Library</a><a aria-current="page" href="../../learn/">Learn</a><a  href="../../updates/">Updates</a><a class="github" href="https://github.com/bdonaldharris/builder-garage" aria-label="GitHub (opens in a new tab)" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav></header><main id="main"><article class="article"><a class="back" href="../">← Learn</a><h1>Project configuration</h1><p><a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/configuration.md" target="_blank" rel="noopener noreferrer">View source ↗</a></p><div class="reading"><h1 id="project-configuration">Project Configuration</h1>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Builder Garage guide: Project configuration."><meta property="og:title" content="Project configuration"><meta property="og:description" content="Builder Garage guide: Project configuration."><meta property="og:image" content="../../assets/workshop.png"><title>Project configuration · Builder Garage</title><link rel="preload" href="../../assets/fonts/archivo-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="../../assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="../../assets/fonts/fonts.css"><link rel="stylesheet" href="../../site.css"></head><body><a class="skip" href="#main">Skip to content</a><header><a class="brand" href="/"><img src="../../assets/logo.png" alt="Builder Garage"></a><button class="menu" aria-label="Open navigation" aria-controls="site-nav" aria-expanded="false">Menu</button><nav id="site-nav" aria-label="Primary"><a  href="../../how-it-works/">How it works</a><a  href="../../get-started/">Get Started</a><a  href="../../library/">Library</a><a aria-current="page" href="../../learn/">Learn</a><a  href="../../updates/">Updates</a><a class="github" href="https://github.com/bdonaldharris/builder-garage" aria-label="GitHub (opens in a new tab)" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav></header><main id="main"><article class="article"><a class="back" href="../">← Learn</a><h1>Project configuration</h1><p><a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/configuration.md" target="_blank" rel="noopener noreferrer">View source ↗</a></p><div class="reading"><h1 id="project-configuration">Project Configuration</h1>
 <p><strong>Schema version:</strong> 2
 <strong>Status:</strong> Canonical. Defined under <a href="https://github.com/bdonaldharris/builder-garage/issues/35" target="_blank" rel="noopener noreferrer">#35</a>, following the <a href="https://github.com/bdonaldharris/builder-garage/issues/35#issuecomment-6842152164" target="_blank" rel="noopener noreferrer">#35 maintainer decision</a> and the <a href="https://github.com/bdonaldharris/builder-garage/issues/35#issuecomment-6839187808" target="_blank" rel="noopener noreferrer">#33/#35 decision</a>.</p>
 <p>A project&#39;s Builder Garage configuration lives in one file, <code>.garage/config.yaml</code>, at the project root. It is the sole canonical source of the project&#39;s configured choices. It is tracked with the project and changes through the project&#39;s normal review process.</p>
+<p><code>.garage/</code> may also hold <code>.garage/prompts/</code>, where <a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/skills/prompt-authoring-workflow/SKILL.md" target="_blank" rel="noopener noreferrer">prompt-authoring-workflow</a> saves prompts by default when the Builder asks to save one. Saved prompts are not configuration: <code>garage</code> never reads them, and no skill takes a project value from one.</p>
 <p>The file has two sections:</p>
 <ul>
-<li><strong><code>project</code></strong> holds the project&#39;s values at the extension points that the <a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/extension-points.md" target="_blank" rel="noopener noreferrer">extension-point registry</a> declares. Nothing else in the responsibility model is configurable, and no value can weaken the <a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/responsibility-floor.md" target="_blank" rel="noopener noreferrer">responsibility floor</a>.</li>
-<li><strong><code>tooling</code></strong> holds Garage tooling settings, documented in <a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/tooling-configuration.md" target="_blank" rel="noopener noreferrer">Tooling configuration</a>. Tooling settings are outside the registry and grant no workflow authority.</li>
+<li><strong><code>project</code></strong> holds the project&#39;s values at the extension points that the <a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/extension-points.md" target="_blank" rel="noopener noreferrer">extension-point registry</a> declares. Nothing else in the responsibility model is configurable, and no value can weaken the <a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/responsibility-floor.md" target="_blank" rel="noopener noreferrer">responsibility floor</a>.</li>
+<li><strong><code>tooling</code></strong> holds Garage tooling settings, documented in <a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/tooling-configuration.md" target="_blank" rel="noopener noreferrer">Tooling configuration</a>. Tooling settings are outside the registry and grant no workflow authority.</li>
 </ul>
-<p>The canonical <a href="https://github.com/bdonaldharris/builder-garage/tree/7c062921a2f2c380da1031fad1e60cfe06a4c944/skills/" target="_blank" rel="noopener noreferrer">skills</a> read this file, as described in <a href="#how-the-skills-read-the-configuration">How the skills read the configuration</a>.</p>
+<p>The canonical <a href="https://github.com/bdonaldharris/builder-garage/tree/f0783592059a739c3dd86a42c3432815eed2fea9/skills/" target="_blank" rel="noopener noreferrer">skills</a> read this file, as described in <a href="#how-the-skills-read-the-configuration">How the skills read the configuration</a>.</p>
 <h2 id="the-project-section">The <code>project</code> section</h2>
 <p>Each key carries one extension point. The registry defines its allowed values, default, and constraint; this table gives only the YAML shape.</p>
 <div class="table-scroll" role="region" aria-label="Scrollable table" tabindex="0"><table>
@@ -21,63 +22,69 @@
 </thead>
 <tbody><tr>
 <td><code>integration_branch</code></td>
-<td><a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/extension-points.md#e1-integration-branch" target="_blank" rel="noopener noreferrer">E1</a></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/extension-points.md#e1-integration-branch" target="_blank" rel="noopener noreferrer">E1</a></td>
 <td>A branch name</td>
 <td>The default, <code>staging</code>, applies</td>
 </tr>
 <tr>
 <td><code>pr_review_triggers</code></td>
-<td><a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/extension-points.md#e2-additional-pr-review-triggers" target="_blank" rel="noopener noreferrer">E2</a></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/extension-points.md#e2-additional-pr-review-triggers" target="_blank" rel="noopener noreferrer">E2</a></td>
 <td>A list of <code>{name, applies_when}</code></td>
 <td>Only the two minimum triggers apply</td>
 </tr>
 <tr>
 <td><code>automated_reviewer</code></td>
-<td><a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/extension-points.md#e3-automated-reviewer" target="_blank" rel="noopener noreferrer">E3</a></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/extension-points.md#e3-automated-reviewer" target="_blank" rel="noopener noreferrer">E3</a></td>
 <td><code>{name, request}</code>: the reviewer and how its review is requested</td>
 <td>No automated reviewer</td>
 </tr>
 <tr>
 <td><code>small_corrections</code></td>
-<td><a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/extension-points.md#e4-small-correction-entry-path" target="_blank" rel="noopener noreferrer">E4</a></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/extension-points.md#e4-small-correction-entry-path" target="_blank" rel="noopener noreferrer">E4</a></td>
 <td><code>{enabled, without_issue}</code></td>
 <td>Disabled</td>
 </tr>
 <tr>
 <td><code>discovery</code></td>
-<td><a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/extension-points.md#e5-discovery-applicability" target="_blank" rel="noopener noreferrer">E5</a></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/extension-points.md#e5-discovery-applicability" target="_blank" rel="noopener noreferrer">E5</a></td>
 <td><code>{mode}</code>, where <code>mode</code> is <code>implementer-judgment</code> or <code>triggers</code>; with <code>triggers</code>, also a non-empty <code>triggers</code> list of <code>{name, applies_when}</code></td>
 <td><strong>Required.</strong> There is no default.</td>
 </tr>
 <tr>
 <td><code>release_conditions</code></td>
-<td><a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/extension-points.md#e6-release-and-evidence-conditions" target="_blank" rel="noopener noreferrer">E6</a></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/extension-points.md#e6-release-and-evidence-conditions" target="_blank" rel="noopener noreferrer">E6</a></td>
 <td>A list of <code>{name, applies_when, required_evidence}</code></td>
 <td>None</td>
 </tr>
 <tr>
 <td><code>suggestions_backlog</code></td>
-<td><a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/extension-points.md#e7-improvement-suggestions-backlog" target="_blank" rel="noopener noreferrer">E7</a></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/extension-points.md#e7-improvement-suggestions-backlog" target="_blank" rel="noopener noreferrer">E7</a></td>
 <td>An issue reference such as <code>&quot;#24&quot;</code>, or <code>none</code></td>
 <td>The repository&#39;s <code>Application Improvement Suggestions</code> issue</td>
 </tr>
 <tr>
 <td><code>authorities</code></td>
-<td><a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/extension-points.md#e8-human-authorities" target="_blank" rel="noopener noreferrer">E8</a></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/extension-points.md#e8-human-authorities" target="_blank" rel="noopener noreferrer">E8</a></td>
 <td><code>workflow_owner</code>, <code>change_acceptor</code>, <code>product_intent_acceptor</code>, and <code>small_correction_classifier</code>, each <code>{role, members}</code>; <code>members</code> is optional</td>
 <td><strong><code>workflow_owner</code>, <code>change_acceptor</code>, and <code>product_intent_acceptor</code> are required.</strong> <code>small_correction_classifier</code> is required when, and allowed only when, small corrections are enabled.</td>
 </tr>
 <tr>
 <td><code>user_facing_inspection</code></td>
-<td><a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/extension-points.md#e9-user-facing-inspection-trigger" target="_blank" rel="noopener noreferrer">E9</a></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/extension-points.md#e9-user-facing-inspection-trigger" target="_blank" rel="noopener noreferrer">E9</a></td>
 <td><code>{additional_conditions}</code>: a list of project conditions added to the canonical trigger</td>
 <td>The canonical trigger alone</td>
 </tr>
 <tr>
 <td><code>guidance</code></td>
-<td><a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/extension-points.md#e10-manuals" target="_blank" rel="noopener noreferrer">E10</a></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/extension-points.md#e10-manuals" target="_blank" rel="noopener noreferrer">E10</a></td>
 <td><code>{manuals}</code>: a list of <code>{name, version}</code>. A <code>conditional</code> list is refused: conditional stack or provider guidance is not configurable (<a href="https://github.com/bdonaldharris/builder-garage/issues/56#issuecomment-6859392233" target="_blank" rel="noopener noreferrer">#56 decision</a>)</td>
 <td>No manual; conditional guidance applies only under its own condition</td>
+</tr>
+<tr>
+<td><code>release_branch</code></td>
+<td><a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/extension-points.md#e11-release-branch" target="_blank" rel="noopener noreferrer">E11</a></td>
+<td>A branch name, different from the integration branch</td>
+<td>No release branch, so no hotfix path</td>
 </tr>
 </tbody></table>
 </div>
@@ -89,7 +96,7 @@
 </li>
 <li><p><strong>Guided setup.</strong> When both input and output are a terminal, <code>init</code> guides the person running it (<a href="https://github.com/bdonaldharris/builder-garage/issues/54#issuecomment-6857444538" target="_blank" rel="noopener noreferrer">#54 decision</a>):</p>
 <ul>
-<li><strong>A new configuration.</strong> <code>init</code> walks through every choice that no flag supplies: the integration branch, the human responsibilities, the policies, manuals, and skill targets. Conditional stack or provider guidance is not configurable, so it is not offered. It uses plain language and numbered menus, shows each default, and does not show extension-point identifiers or flag syntax. A choice left at its default is not written, so the default applies.</li>
+<li><strong>A new configuration.</strong> <code>init</code> walks through every choice that no flag supplies: the integration branch, the human responsibilities, the policies, manuals, the release branch for hotfixes, and skill targets. Conditional stack or provider guidance is not configurable, so it is not offered. It uses plain language and numbered menus, shows each default, and does not show extension-point identifiers or flag syntax. A choice left at its default is not written, so the default applies.</li>
 <li><strong>Responsibilities.</strong> Each human responsibility is explained where it is chosen. An authority already named can be reused without retyping it. Placeholder answers, such as <code>ROLE</code>, <code>TBD</code>, or <code>&lt;role&gt;</code>, are rejected.</li>
 <li><strong>Repository branch.</strong> When the repository&#39;s <code>origin/HEAD</code> names a default branch, it is offered as the integration branch.</li>
 <li><strong>Skill targets.</strong> These are offered as a pick list. Each chosen target is written with the version and date its paths were confirmed with.</li>
@@ -145,7 +152,7 @@
 <td>Whether a configured branch or issue exists</td>
 </tr>
 <tr>
-<td>Tooling values, as described in <a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/tooling-configuration.md" target="_blank" rel="noopener noreferrer">Tooling configuration</a></td>
+<td>Tooling values, as described in <a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/tooling-configuration.md" target="_blank" rel="noopener noreferrer">Tooling configuration</a></td>
 <td></td>
 </tr>
 </tbody></table>
@@ -256,7 +263,7 @@
 </tbody></table>
 </div>
 <p><code>garage init</code> migrates version 1 to version 2. Any other version is refused. A later incompatible change increments the version and adds an explicit migration.</p>
-<p><strong>Migration promise.</strong> Before 1.0, Garage does not promise stable commands, skill contracts, or configuration semantics. It does promise that every configuration-schema change provides an in-place <code>garage init</code> upgrade path. That path preserves existing human choices, validates the result, and never silently discards configuration (<a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/adr/0002-semantic-versioning.md#4-configuration-migration-is-promised-broad-pre-10-compatibility-is-not" target="_blank" rel="noopener noreferrer">ADR 0002</a>).</p>
+<p><strong>Migration promise.</strong> Before 1.0, Garage does not promise stable commands, skill contracts, or configuration semantics. It does promise that every configuration-schema change provides an in-place <code>garage init</code> upgrade path. That path preserves existing human choices, validates the result, and never silently discards configuration (<a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/adr/0002-semantic-versioning.md#4-configuration-migration-is-promised-broad-pre-10-compatibility-is-not" target="_blank" rel="noopener noreferrer">ADR 0002</a>).</p>
 <h2 id="builder-garages-own-configuration">Builder Garage&#39;s own configuration</h2>
-<p>Builder Garage&#39;s <a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/.garage/config.yaml" target="_blank" rel="noopener noreferrer"><code>.garage/config.yaml</code></a> was generated, not hand-authored, by the noninteractive command recorded in its <a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/docs/skill-adoption.md#configuration" target="_blank" rel="noopener noreferrer">skill-adoption profile</a>. It is single-project evidence of the configuration in use, not proof that it suits other projects.</p>
-</div></article></main><footer><img src="../../assets/logo.png" alt="Builder Garage"><p><a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a> · © 2026 B Donald Harris<br><a href="../../updates/">Source details</a></p><nav aria-label="Footer"><a href="https://github.com/bdonaldharris/builder-garage" target="_blank" rel="noopener noreferrer">GitHub</a><a href="../../contribute/">Contribute</a><a href="../../privacy/">Privacy</a><a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/CODE_OF_CONDUCT.md" target="_blank" rel="noopener noreferrer">Code of Conduct</a><a href="https://github.com/bdonaldharris/builder-garage/blob/7c062921a2f2c380da1031fad1e60cfe06a4c944/SECURITY.md" target="_blank" rel="noopener noreferrer">Security</a><a href="../../rss.xml">RSS</a></nav></footer><script src="../../site.js"></script></body></html>
+<p>Builder Garage&#39;s <a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/.garage/config.yaml" target="_blank" rel="noopener noreferrer"><code>.garage/config.yaml</code></a> was generated, not hand-authored, by the noninteractive command recorded in its <a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/docs/skill-adoption.md#configuration" target="_blank" rel="noopener noreferrer">skill-adoption profile</a>. It is single-project evidence of the configuration in use, not proof that it suits other projects.</p>
+</div></article></main><footer><img src="../../assets/logo.png" alt="Builder Garage"><p><a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a> · © 2026 B Donald Harris<br><a href="../../updates/">Source details</a></p><nav aria-label="Footer"><a href="https://github.com/bdonaldharris/builder-garage" target="_blank" rel="noopener noreferrer">GitHub</a><a href="../../contribute/">Contribute</a><a href="../../privacy/">Privacy</a><a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/CODE_OF_CONDUCT.md" target="_blank" rel="noopener noreferrer">Code of Conduct</a><a href="https://github.com/bdonaldharris/builder-garage/blob/f0783592059a739c3dd86a42c3432815eed2fea9/SECURITY.md" target="_blank" rel="noopener noreferrer">Security</a><a href="../../rss.xml">RSS</a></nav></footer><script src="../../site.js"></script></body></html>

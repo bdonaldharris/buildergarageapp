@@ -31,7 +31,7 @@ for (const [path, html] of pages) {
   const githubCTA = html.match(/<a class="github"[^>]*>/)?.[0];
   assert.ok(githubCTA?.includes('target="_blank"') && githubCTA.includes('rel="noopener noreferrer"') && githubCTA.includes('aria-label="GitHub (opens in a new tab)"'), `GitHub CTA opens a safe, announced new tab: ${path}`);
   assert.ok(!/\bclass="[^"]*\beyebrow\b/.test(html), `Page omits eyebrow labels: ${path}`);
-  assert.doesNotMatch(html, /\b(?:SignPath|Authenticode|SmartScreen)\b|\bWindows code-signing\b/i, `Page omits Windows signing copy: ${path}`);
+  assert.doesNotMatch(html, /\b(?:SignPath|Authenticode|SmartScreen|platform[- ]sign(?:ed|ing))\b|\bWindows code-signing\b/i, `Page omits Windows signing copy: ${path}`);
   const footer = html.match(/<footer>[\s\S]*?<\/footer>/)?.[0];
   assert.ok(footer?.includes('>Source details</a>'), `Footer links to source details: ${path}`);
   assert.match(footer, /<a href="[^"]*privacy\/">Privacy<\/a>/, `Footer links to privacy policy: ${path}`);
@@ -92,7 +92,11 @@ for (const guide of catalog.guides) {
 }
 const updates = readFileSync(resolve(dist, 'updates/index.html'), 'utf8');
 assert.ok(updates.includes(`${catalog.version} · ${sha.slice(0, 7)}`), 'Updates retains snapshot provenance');
-assert.ok(home.includes(`git checkout ${sha}`), 'Install commands retain the exact revision');
+const cliDetail = readFileSync(resolve(dist, 'library/cli/garage/index.html'), 'utf8');
+for (const [label, html] of [['Home', home], ['Getting Started', gettingStarted], ['CLI detail', cliDetail]]) {
+  assert.ok(html.includes('<pre>npm install -g @buildergarage/garage</pre>') && html.includes('Node.js 20 or later'), `Copyable npm install guidance is present on ${label}`);
+}
+assert.ok(gettingStarted.includes(`git checkout ${sha}`) && cliDetail.includes(`git checkout ${sha}`), 'Source build commands retain the exact revision');
 const release = loadRelease();
 const releaseUrl = `${repo}/releases/tag/${release.version}`;
 for (const page of ['download/index.html', 'learn/build-from-source/index.html']) {
@@ -106,8 +110,13 @@ for (const html of [gettingStarted, updates, readFileSync(resolve(dist, 'library
 }
 const download = readFileSync(resolve(dist, 'download/index.html'), 'utf8');
 assert.ok(download.includes('<fieldset class="os-selector" hidden>') && !download.includes('id="download-os"'), 'OS choices are enhanced without hiding downloads when JavaScript is unavailable');
+for (const os of ['windows', 'macos', 'linux']) {
+  const platform = download.match(new RegExp(`<section class="download-platform" data-platform="${os}">([\\s\\S]*?)</section>`))?.[1];
+  assert.ok(platform, `Download options are grouped for ${os}`);
+  assert.equal(platform.includes('npm install -g @buildergarage/garage'), os !== 'windows', `npm install guidance matches supported platforms: ${os}`);
+}
 for (const asset of release.assets) assert.ok(download.includes(`href="${asset.url}"`), `Download page links to ${asset.name}`);
-assert.ok(download.includes(release.revision.slice(0, 7)) && download.includes(sha.slice(0, 7)), 'Release and source revisions are distinct');
+assert.ok(download.includes(`${repo}/commit/${release.revision}`) && download.includes(`${repo}/commit/${sha}`), 'Release and source provenance are shown');
 
 const fontStylesheet = resolve(dist, 'assets/fonts/fonts.css');
 const fonts = readFileSync(fontStylesheet, 'utf8');

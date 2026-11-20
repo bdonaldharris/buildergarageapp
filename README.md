@@ -23,9 +23,11 @@ The build displays the source revision and version, reads the Go requirement fro
 
 Resolve the upstream default branch to a full commit SHA, verify its version tag, and update `revision` and `version` in `framework-source.json`. Then review the upstream README, CLI commands, configuration and skill-installation contracts, manuals, Crew roles, review evidence, and contribution process against the summaries in `scripts/build.mjs`. Catalog counts, roles, descriptions, downloads, guides, and the Go requirement come from the snapshot; editorial capability summaries still require this review.
 
-The current verified source snapshot is `v0.1.1` (`7c062921a2f2c380da1031fad1e60cfe06a4c944`): six canonical skills, three provisional technology manuals, the source installer, project configuration commands, local workflow records, managed skill/manual installation, and read-only GitHub status. It is separate from the CLI release listed in `release.json`. Agent orchestration, AI-provider connections, plugins, remote services, libraries, adapters, and SDKs are not implemented in this snapshot.
+The current verified source snapshot is `v0.4.0` (`f0783592059a739c3dd86a42c3432815eed2fea9`): eight canonical skills (including project specification and prompt authoring), three provisional technology manuals, project configuration, offline local history, managed skill/manual installation, read-only GitHub status, and on-demand release checks. The snapshot is pinned independently of the CLI release listed in `release.json`. Agent orchestration, AI-provider connections, plugins, remote services, libraries, adapters, and SDKs are not implemented in this snapshot.
 
 ## CLI releases
+
+The homepage quick start, Getting Started, CLI Library entry, and macOS and Linux download sections show `npm install -g @buildergarage/garage` for Node.js 20 or later. Windows users can still download a ZIP archive from the Downloads page.
 
 The download page reads `release.json`, a checked-in manifest of the latest stable CLI release, its tagged commit, and GitHub asset URLs. Run `node scripts/update-release.mjs` to refresh it from the GitHub API; use `GITHUB_TOKEN` if unauthenticated API limits are a concern. The updater refuses missing archives, checksum/signature assets, incomplete package sets, or invalid asset URLs rather than publishing partial downloads. The manifest does not update the separate `framework-source.json` pin. Check the linked release notes for macOS signing and notarization status; the manifest does not infer signing.
 
@@ -51,7 +53,7 @@ The footer links to a website privacy policy generated in `scripts/build.mjs`. R
 
 Learn guides use a 1200px article shell with prose capped at 75ch. Tables and code can use the full inner width; tables use 16px text and keyboard-focusable horizontal scrolling when needed. Mobile guides retain 16px gutters.
 
-Keep build provenance out of the main reading flow: Updates holds the framework version and revision, linked as "Source details" from every footer. Artifact revisions and skill file inventories live in collapsed technical details; roles, provisional status, and installation requirements stay visible. Guide headers link to their pinned source without repeating repository paths or revisions. The source manifest, installation commands, downloads, and upstream guide content retain their technical detail. The source-build guide explicitly labels its release-availability corrections because the tagged README predates publication; other source content is unchanged. Review those corrections when updating the snapshot.
+Keep build provenance out of the main reading flow: Updates holds the framework version and revision, linked as "Source details" from every footer. Artifact revisions and skill file inventories live in collapsed technical details; roles, provisional status, and installation requirements stay visible. Guide headers link to their pinned source without repeating repository paths or revisions. The source-build guide notes its snapshot and links to current downloads. The generator corrects stale release wording and omits Windows signing discussion from the rendered guide. Review those edits when updating the snapshot.
 
 ## Publish
 

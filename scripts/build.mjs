@@ -16,9 +16,10 @@ const release = loadRelease(resolve(root, 'release.json'));
 const releaseVersion = release.version;
 const releaseUrl = `${repo}/releases/tag/${releaseVersion}`;
 const releaseVerification = `${repo}/blob/${releaseVersion}/docs/release-verification.md`;
+const macTrust = `Starting with <a href="${repo}/releases/tag/v0.4.0">v0.4.0</a>, macOS executables are Developer ID signed and Apple-notarized. See <a href="${releaseVerification}#macos-signature-and-notarization">how Gatekeeper verifies the signature and notarization</a>.`;
 const releaseInfo = `<p><a href="/download/">Download garage ${releaseVersion}</a> for macOS, Linux, or Windows on amd64 and arm64. Prebuilt executables do not require Go.</p>
   <p>Verify the signed checksum manifest and your archive's checksum before running it; GitHub artifact attestations are also available. Follow <a href="${releaseVerification}">release verification and terminal extraction instructions ↗</a>.</p>
-  <p class="callout">On macOS, Gatekeeper restrictions may apply. Check the <a href="${releaseUrl}">release notes</a> for macOS signing and notarization status. Integrity and provenance verification do not replace operating-system publisher trust.</p>`;
+  <p class="callout">${macTrust}</p>`;
 const text = p => readFileSync(resolve(source, p), 'utf8');
 const goVersion = text('go.mod').match(/^go (\S+)$/m)?.[1];
 if (!goVersion) throw new Error('Framework go.mod is missing its Go version.');
@@ -38,7 +39,7 @@ const manuals = existsSync(resolve(source, 'manuals')) ? readdirSync(resolve(sou
   const path = `manuals/${file}`, [meta] = frontmatter(text(path)); const name = meta.name || basename(file, '.md');
   return { type: 'manuals', name, alias: `manual v${meta.version || '0.1'}`, role: meta.status || 'provisional', summary: meta.description || `${name} engineering manual.`, description: meta.description || `${name} engineering manual.`, path, url: `/library/manuals/${name}/`, sourceUrl: `${repo}/blob/${sha}/${path}`, manual: true };
 }) : [];
-const cli = { type: 'cli', name: 'garage', alias: 'CLI', role: 'foundation', summary: 'A CLI for project configuration, private local workflow records, skill and adopted-manual installation, and read-only GitHub workflow status. Available as a prebuilt binary or source build.', description: 'The CLI initializes and upgrades project configuration; validates, shows, and changes settings; records private local workflow events; installs and verifies canonical skills and adopted manuals; reads issue or pull-request workflow status through gh; and reports its version. It does not execute workflows, configure agents, connect AI providers, load plugins, or provide remote services.', path: 'cmd/garage/main.go', url: '/library/cli/garage/', sourceUrl: `${repo}/blob/${sha}/cmd/garage/main.go` };
+const cli = { type: 'cli', name: 'garage', alias: 'CLI', role: 'foundation', summary: 'A CLI for project configuration, private local workflow history, skill and manual installation, read-only GitHub workflow status, and on-demand release checks.', description: 'The CLI initializes, upgrades, validates, shows, and changes project configuration; records and reads private local workflow events; installs and verifies canonical skills and adopted manuals; reads issue and pull-request workflow status through gh; and checks for newer releases only when asked. It does not install updates, execute workflows, configure agents, connect AI providers, load plugins, or provide remote services.', path: 'cmd/garage/main.go', url: '/library/cli/garage/', sourceUrl: `${repo}/blob/${sha}/cmd/garage/main.go` };
 const artifacts = [cli, ...skills, ...manuals];
 const artifactLabel = a => ({ skills: 'Skill', manuals: 'Manual', cli: 'CLI' })[a.type];
 const roles = [...new Set(skills.map(a => a.role))];
@@ -48,6 +49,7 @@ const guideFiles = [
   ['skill-installation', 'Install and verify skills', 'docs/skill-installation.md'],
   ['manuals', 'Adopt technology manuals', 'manuals/README.md'],
   ['principles', 'Engineering principles', 'docs/principles.md'],
+  ['project-specs', 'Write project specifications', 'docs/project-specs.md'],
   ['review-evidence', 'Revision-identifiable review evidence', 'docs/review-evidence.md'],
   ['gate-map', 'From issue to merge', 'inspection/gate-map.md'],
   ['filling-roles', 'Filling Crew roles', 'crew/filling-roles.md'],
@@ -66,6 +68,8 @@ function footer(depth='') { return `<footer><img src="${depth}assets/logo.png" a
 function layout({ title, description, current='', depth='', body }) { return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="${esc(description)}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:image" content="${depth}assets/workshop.png"><title>${esc(title)} · Builder Garage</title><link rel="preload" href="${depth}assets/fonts/archivo-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="${depth}assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="${depth}assets/fonts/fonts.css"><link rel="stylesheet" href="${depth}site.css"></head><body>${nav(current,depth)}<main id="main">${body}</main>${footer(depth)}<script src="${depth}site.js"></script></body></html>`; }
 const status = `<span class="status"><i></i> Foundation stage</span>`;
 const code = (value, title='') => `<div class="code">${title?`<b>${esc(title)}</b>`:''}<button class="copy" aria-label="Copy commands">Copy</button><pre>${esc(value)}</pre><span class="copy-live" aria-live="polite"></span></div>`;
+const npmCommand = 'npm install -g @buildergarage/garage';
+const npmInstall = `<p>On macOS or Linux with Node.js 20 or later, install the <a href="https://www.npmjs.com/package/@buildergarage/garage">official npm package</a>:</p>${code(npmCommand)}<p>Run <code>garage version</code> to confirm it’s installed.</p>`;
 const pageHead = (title,lead,aside='') => `<section class="page-head"><div><h1>${title}</h1><p>${lead}</p></div>${aside}</section>`;
 function write(path, html) { const file = resolve(out, path, 'index.html'); mkdirSync(dirname(file), {recursive:true}); writeFileSync(file, openExternalLinks(html)); }
 const resourceIcons = {
@@ -95,8 +99,8 @@ write('', layout({
         </div>
         <div class="hero-install">
           <div class="terminal-bar"><span class="terminal-lights" aria-hidden="true"><i></i><i></i><i></i></span><span>garage / quick start</span></div>
-          ${code(sourceInstall, 'Install from source / macOS + Linux')}
-          <p class="install-note">Prefer a prebuilt CLI? <a href="download/">Download ${releaseVersion} for macOS, Linux, or Windows →</a>.<br>Source builds require Go ${esc(goVersion)}. No hosted runtime.<br><a href="get-started/#framework">Read setup and release verification guidance →</a></p>
+          ${code(npmCommand, 'Install with npm / macOS + Linux')}
+          <p class="install-note">Requires Node.js 20 or later. <a href="download/">Download ${releaseVersion} for macOS, Linux, or Windows →</a><br><a href="get-started/#framework">Set up a project or build from source →</a></p>
         </div>
       </div>
     </section>
@@ -189,7 +193,8 @@ function artifactDetail(a, depth = '') {
       ${code(`garage config add manual ${a.name}\ngarage skills install\ngarage skills verify`)}
       <p>The CLI delivers <code>builder-garage-manual-${esc(a.name)}</code> as a skill. Installation alone does not make the guidance apply: the project's configuration must adopt it. Manuals are guidance, not workflow requirements or configuration files. See <a href="${depth}learn/manuals/">how manuals are used</a>.</p>`;
   } else {
-    instructions = `<h2>Download a prebuilt CLI</h2>${releaseInfo}
+    instructions = `<h2>Install with npm</h2>${npmInstall}
+      <h2>Download a prebuilt CLI</h2>${releaseInfo}
       <h2>Or build from source</h2>${code(sourceInstall, 'macOS and Linux')}
       <p>${esc(installRequirements)} Compiled executables do not require Go at run time.</p>
       <p>A plain <code>go build ./cmd/garage</code> reports <code>dev</code>; the source installer derives its version from Git.</p>
@@ -235,15 +240,20 @@ write('download', layout({
       </section>
       <section class="download-platform" data-platform="macos"><h2>macOS</h2>
         <div class="download-links">${downloadLink(`garage_${releaseNumber}_darwin_arm64.tar.gz`, 'macOS · Apple silicon (.tar.gz)')}${downloadLink(`garage_${releaseNumber}_darwin_amd64.tar.gz`, 'macOS · Intel (.tar.gz)')}</div>
-        <p>Consult the <a href="${releaseUrl}">release notes</a> for signing and notarization status. Gatekeeper restrictions may apply.</p>
+        <p>${macTrust}</p>
+        ${npmInstall}
       </section>
       <section class="download-platform" data-platform="linux"><h2>Linux</h2>
         <div class="download-links">${downloadLink(`garage_${releaseNumber}_linux_amd64.tar.gz`, 'Linux · x64 (.tar.gz)')}${downloadLink(`garage_${releaseNumber}_linux_arm64.tar.gz`, 'Linux · ARM64 (.tar.gz)')}${downloadLink(`garage_${releaseNumber}_linux_amd64.deb`, 'Linux · x64 (.deb)')}${downloadLink(`garage_${releaseNumber}_linux_arm64.deb`, 'Linux · ARM64 (.deb)')}${downloadLink(`garage-${releaseNumber}-1.x86_64.rpm`, 'Linux · x64 (.rpm)')}${downloadLink(`garage-${releaseNumber}-1.aarch64.rpm`, 'Linux · ARM64 (.rpm)')}</div>
+        ${npmInstall}
+        <p>Homebrew users can install the Linux cask from <a href="${releaseVerification}#homebrew-linux">Builder Garage’s tap</a>.</p>
       </section>
+      <h2>Check for updates</h2>
+      <p>Run <code>garage update check</code> to compare your installed version with the latest published release. It only checks when you run it and never installs an update.</p>
       <h2>Verify before running</h2>
       <p>Verify the signed checksum manifest and your archive or package checksum before running or installing. Artifact attestations are also available. Verification establishes integrity and origin, not operating-system publisher trust. Follow the <a href="${releaseVerification}">release verification instructions</a>.</p>
       <p><a href="${esc(releaseAsset(`garage_${releaseNumber}_checksums.txt`).url)}">Checksum manifest ↗</a> · <a href="${esc(releaseAsset(`garage_${releaseNumber}_checksums.txt.sigstore.json`).url)}">Signature bundle ↗</a></p>
-      <p>The CLI release is ${esc(releaseVersion)} (<a href="${repo}/commit/${release.revision}">${release.revision.slice(0, 7)}</a>); the site's Library and guides use the separately pinned ${esc(version)} source snapshot (<a href="${repo}/commit/${sha}">${shortSha}</a>). They may contain different revisions.</p>
+      <p>The CLI release is ${esc(releaseVersion)} (<a href="${repo}/commit/${release.revision}">${release.revision.slice(0, 7)}</a>); the site's Library and guides use the separately pinned ${esc(version)} source snapshot (<a href="${repo}/commit/${sha}">${shortSha}</a>). ${release.revision === sha ? 'The Library skills and manuals match the source embedded in this release.' : 'The release and the site snapshot are from different revisions.'}</p>
       <p><a href="../get-started/#framework">Continue to project setup and source builds →</a></p>
     </section>`
 }));
@@ -258,7 +268,9 @@ write('get-started', layout({
     <section class="content">
       <div class="path-grid">
         <article id="framework"><span class="tag">PATH A</span><h2>Use the framework</h2>
+          <h3>Install with npm</h3>${npmInstall}
           <h3>Download a prebuilt CLI</h3>${releaseInfo}
+          <p>On macOS and Linux, you can also <a href="../learn/build-from-source/#install-a-release">install a verified release with <code>install.sh</code></a>. Linux also offers <code>.deb</code>, <code>.rpm</code>, and a Homebrew cask.</p>
           <h3>Or build from source</h3><p>Install the CLI from the verified source revision:</p>${code(sourceInstall, 'macOS and Linux')}
           <p>${esc(installRequirements)} If <code>~/.local/bin</code> is not on PATH, follow the installer's instructions before continuing.</p>
           <p><a href="../learn/build-from-source/#build-by-hand">Windows and manual builds →</a></p>
@@ -278,7 +290,7 @@ write('get-started', layout({
       <h2 id="what-exists-today">What exists today</h2>
       <div class="comparison">
         <p><b>Available:</b> <a href="../download/">prebuilt CLI archives for macOS, Linux, and Windows</a> on amd64 and arm64; source builds; ${skills.length} reusable engineering skills; ${manuals.length} technology manuals (${[...new Set(manuals.map(a => a.role))].map(esc).join(', ')}); the operating model, review contract, governance, and contribution guides.</p>
-        <p><b>The CLI:</b> initializes and upgrades project configuration; validates, shows, and changes settings; records private local workflow events; installs and verifies canonical skills and adopted manuals; reads issue and pull-request workflow status through authenticated <code>gh</code>; and reports its version.</p>
+        <p><b>The CLI:</b> manages project configuration; records and reads private local workflow history; installs and verifies canonical skills and adopted manuals; reads issue and pull-request workflow status through authenticated <code>gh</code>; and reports its version. <code>garage update check</code> checks for newer releases on demand without installing them.</p>
         <p><b>Not implemented:</b> workflow execution or agent orchestration, agent configuration, AI-provider connections, plugin loading, remote services, libraries, adapters, or SDKs.</p>
       </div>
     </section>`
@@ -304,7 +316,7 @@ write('how-it-works', layout({
       <p>Required checks, deployment-requirement visibility, configured release conditions, human change acceptance, and product-intent acceptance still govern merge. Where practical, user-facing changes are inspected by the human product-intent acceptor.</p>
       <p><a href="../learn/gate-map/">See the complete gate map →</a></p>
       <h2>Current CLI capabilities</h2><p>${esc(cli.description)}</p>
-      <p>Local workflow history is a private annotation, not review evidence. GitHub issue and PR records are authoritative. <code>garage status</code> reads GitHub once through authenticated <code>gh</code>; it never polls, assigns agents, or advances work.</p>
+      <p>Local workflow history is a private annotation, not review evidence. GitHub issue and PR records are authoritative. <code>garage status</code> makes one read through authenticated <code>gh</code> and may make a follow-up read for governing issues, including for pull requests off the default branch. It never polls, assigns agents, or advances work.</p>
     </section>`
 }));
 write('learn', layout({
@@ -319,16 +331,16 @@ for (const [guideSlug, guideTitle, guidePath] of guideFiles) {
   let markdown = text(guidePath);
   if (guidePath === 'README.md') {
     markdown = markdown
-      .replace('; no release is published yet.', `; [${releaseVersion}](${releaseUrl}) is now published.`)
       .replace('and the first published release will be `v0.1.1` ([ADR 0003](docs/adr/0003-release-distribution.md)); none is published yet.', `and [v0.1.1](${repo}/releases/tag/v0.1.1) was the first published release ([ADR 0003](docs/adr/0003-release-distribution.md)).`)
-      .replace(/^- No release is published yet\..*$/m, `- [${releaseVersion}](${releaseUrl}) provides prebuilt CLI archives for macOS, Linux, and Windows on amd64 and arm64. Verify the signed checksum manifest and archive checksum before running a binary; see [Verifying a release](${releaseVerification}). Source installation with [\`install.sh\`](#install-from-source) remains available on macOS and Linux.`)
-      .replace(/^- macOS executables are not yet Developer ID signed.*$/m, `- On macOS, Gatekeeper restrictions may apply. Check the [release notes](${releaseUrl}) for macOS signing and notarization status.`)
-      .replace(/^- Native packages, package-manager channels, and release installers are later tracks.*\r?\n/m, '');
+      .replace(/^- \*\*The Windows executables are not yet platform-signed\*\*.*$/m, `- macOS executables are Developer ID signed and notarized starting with [v0.4.0](${repo}/releases/tag/v0.4.0).`)
+      .replace(/^- \*\*Windows:\*\* a PowerShell installer follows platform signing.*$/m, '- **Windows:** download and verify a release as [Verifying a release](docs/release-verification.md#windows-powershell) shows.')
+      .replace(/^- Windows executables are not yet Authenticode-signed.*\r?\n/m, '')
+      .replace(/ macOS `\.pkg` and Windows `\.msi` installers,.*They wait for platform signing\./, '');
   }
   const body = renderMarkdown(markdown, { source, repo, sha, path: guidePath });
   write(`learn/${guideSlug}`, layout({
     title: guideTitle, description: `Builder Garage guide: ${guideTitle}.`, current: 'learn/', depth: '../../',
-    body: `<article class="article"><a class="back" href="../">← Learn</a><h1>${esc(guideTitle)}</h1><p><a href="${repo}/blob/${sha}/${guidePath}">View source ↗</a></p>${guidePath === 'README.md' ? `<p class="callout">This guide reflects the ${esc(version)} source snapshot, which predates its release. For current downloads, see <a href="../../download/">Download the CLI</a>.</p>` : ''}<div class="reading">${body}</div></article>`
+    body: `<article class="article"><a class="back" href="../">← Learn</a><h1>${esc(guideTitle)}</h1><p><a href="${repo}/blob/${sha}/${guidePath}">View source ↗</a></p>${guidePath === 'README.md' ? `<p class="callout">This guide reflects the ${esc(version)} source snapshot. Get the current release from <a href="${releaseUrl}">GitHub</a> or <a href="../../download/">Download the CLI</a>.</p>` : ''}<div class="reading">${body}</div></article>`
   }));
 }
 write('updates', layout({
@@ -347,7 +359,7 @@ write('contribute', layout({
   body: `${pageHead('Help build the Garage.', 'Builder Garage is maintainer-led and community-contributed. GitHub is where changes are proposed and reviewed.')}
     <section class="content"><div class="path-grid">
       <article><h2>Ways to help</h2><p>Report a problem, propose a change, request discovery, improve documentation, or test a candidate practice. For an existing issue, request assignment and wait for a maintainer before starting.</p><a href="${repo}/issues/new/choose">Open an issue ↗</a><p><a href="../learn/first-contribution/">Your first contribution →</a></p></article>
-      <article><h2>How a change moves</h2><p>Substantive changes pass independent engineering review before a pull request, then maintainer approval before merge. Neither replaces the other. External contributors can run implementation and review in separate execution contexts and post both records on the originating issue.</p><p>Human product-intent acceptance also applies. Inspecting user-facing results is required when the documented trigger holds. A sole maintainer's own pull request uses the documented explicit-acceptance exception, not a self-approving review.</p><a href="${repo}/blob/${sha}/CONTRIBUTING.md">Read contributing ↗</a></article>
+      <article><h2>How a change moves</h2><p>Open ordinary implementation pull requests against <code>staging</code>; <code>main</code> is the release branch. Substantive changes pass independent engineering review before a pull request, then maintainer approval before merge. Neither replaces the other. External contributors can run implementation and review in separate execution contexts and post both records on the originating issue.</p><p>Human product-intent acceptance also applies. Inspecting user-facing results is required when the documented trigger holds. A sole maintainer's own pull request uses the documented explicit-acceptance exception, not a self-approving review.</p><a href="${repo}/blob/${sha}/CONTRIBUTING.md">Read contributing ↗</a></article>
       <article><h2>Project agreements</h2><p>Read the governance, conduct, and security policies before contributing. Report vulnerabilities privately as the security policy directs.</p><p><a href="${repo}/blob/${sha}/GOVERNANCE.md">Governance ↗</a> · <a href="${repo}/blob/${sha}/CODE_OF_CONDUCT.md">Conduct ↗</a> · <a href="${repo}/blob/${sha}/SECURITY.md">Security ↗</a></p></article>
     </div></section>`
 }));
