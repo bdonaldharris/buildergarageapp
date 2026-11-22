@@ -1,54 +1,54 @@
 {
-  "version": "v0.4.0",
-  "revision": "f0783592059a739c3dd86a42c3432815eed2fea9",
+  "version": "v0.5.1",
+  "revision": "3b1bb3ed8dca1782b5f0c2d5a8758fc9dd9e0b0b",
   "assets": [
     {
-      "name": "garage_0.4.0_checksums.txt",
-      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.4.0/garage_0.4.0_checksums.txt"
+      "name": "garage_0.5.1_checksums.txt",
+      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage_0.5.1_checksums.txt"
     },
     {
-      "name": "garage_0.4.0_checksums.txt.sigstore.json",
-      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.4.0/garage_0.4.0_checksums.txt.sigstore.json"
+      "name": "garage_0.5.1_checksums.txt.sigstore.json",
+      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage_0.5.1_checksums.txt.sigstore.json"
     },
     {
-      "name": "garage_0.4.0_darwin_amd64.tar.gz",
-      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.4.0/garage_0.4.0_darwin_amd64.tar.gz"
+      "name": "garage_0.5.1_darwin_amd64.tar.gz",
+      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage_0.5.1_darwin_amd64.tar.gz"
     },
     {
-      "name": "garage_0.4.0_darwin_arm64.tar.gz",
-      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.4.0/garage_0.4.0_darwin_arm64.tar.gz"
+      "name": "garage_0.5.1_darwin_arm64.tar.gz",
+      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage_0.5.1_darwin_arm64.tar.gz"
     },
     {
-      "name": "garage_0.4.0_linux_amd64.deb",
-      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.4.0/garage_0.4.0_linux_amd64.deb"
+      "name": "garage_0.5.1_linux_amd64.deb",
+      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage_0.5.1_linux_amd64.deb"
     },
     {
-      "name": "garage_0.4.0_linux_amd64.tar.gz",
-      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.4.0/garage_0.4.0_linux_amd64.tar.gz"
+      "name": "garage_0.5.1_linux_amd64.tar.gz",
+      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage_0.5.1_linux_amd64.tar.gz"
     },
     {
-      "name": "garage_0.4.0_linux_arm64.deb",
-      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.4.0/garage_0.4.0_linux_arm64.deb"
+      "name": "garage_0.5.1_linux_arm64.deb",
+      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage_0.5.1_linux_arm64.deb"
     },
     {
-      "name": "garage_0.4.0_linux_arm64.tar.gz",
-      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.4.0/garage_0.4.0_linux_arm64.tar.gz"
+      "name": "garage_0.5.1_linux_arm64.tar.gz",
+      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage_0.5.1_linux_arm64.tar.gz"
     },
     {
-      "name": "garage_0.4.0_windows_amd64.zip",
-      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.4.0/garage_0.4.0_windows_amd64.zip"
+      "name": "garage_0.5.1_windows_amd64.zip",
+      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage_0.5.1_windows_amd64.zip"
     },
     {
-      "name": "garage_0.4.0_windows_arm64.zip",
-      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.4.0/garage_0.4.0_windows_arm64.zip"
+      "name": "garage_0.5.1_windows_arm64.zip",
+      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage_0.5.1_windows_arm64.zip"
     },
     {
-      "name": "garage-0.4.0-1.aarch64.rpm",
-      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.4.0/garage-0.4.0-1.aarch64.rpm"
+      "name": "garage-0.5.1-1.aarch64.rpm",
+      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage-0.5.1-1.aarch64.rpm"
     },
     {
-      "name": "garage-0.4.0-1.x86_64.rpm",
-      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.4.0/garage-0.4.0-1.x86_64.rpm"
+      "name": "garage-0.5.1-1.x86_64.rpm",
+      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage-0.5.1-1.x86_64.rpm"
     }
   ]
 }
