@@ -11,8 +11,16 @@
       "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage_0.5.1_checksums.txt.sigstore.json"
     },
     {
+      "name": "garage_0.5.1_darwin_amd64.pkg",
+      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage_0.5.1_darwin_amd64.pkg"
+    },
+    {
       "name": "garage_0.5.1_darwin_amd64.tar.gz",
       "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage_0.5.1_darwin_amd64.tar.gz"
+    },
+    {
+      "name": "garage_0.5.1_darwin_arm64.pkg",
+      "url": "https://github.com/bdonaldharris/builder-garage/releases/download/v0.5.1/garage_0.5.1_darwin_arm64.pkg"
     },
     {
       "name": "garage_0.5.1_darwin_arm64.tar.gz",

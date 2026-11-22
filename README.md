@@ -21,15 +21,15 @@ The build displays the source revision and version, reads the Go requirement fro
 
 ## Updating the framework snapshot
 
-Resolve the upstream default branch to a full commit SHA, verify its version tag, and update `revision` and `version` in `framework-source.json`. Then review the upstream README, CLI commands, configuration and skill-installation contracts, manuals, Crew roles, review evidence, and contribution process against the summaries in `scripts/build.mjs`. Catalog counts, roles, descriptions, downloads, guides, and the Go requirement come from the snapshot; editorial capability summaries still require this review.
+Resolve the upstream `main` branch to a full commit SHA and update `revision` and `version` in `framework-source.json` (`main` is a branch snapshot, not a release tag). Review the upstream README, CLI commands, configuration and skill-installation contracts, manuals, Crew roles, review evidence, and contribution process against the summaries in `scripts/build.mjs`. Catalog counts, roles, descriptions, downloads, guides, and the Go requirement come from the snapshot; editorial capability summaries still require this review.
 
-The current verified source snapshot is `v0.4.0` (`f0783592059a739c3dd86a42c3432815eed2fea9`): eight canonical skills (including project specification and prompt authoring), three provisional technology manuals, project configuration, offline local history, managed skill/manual installation, read-only GitHub status, and on-demand release checks. The snapshot is pinned independently of the CLI release listed in `release.json`. Agent orchestration, AI-provider connections, plugins, remote services, libraries, adapters, and SDKs are not implemented in this snapshot.
+The current verified source snapshot is `main` (`f9786648988f2b8be3080ebde7867580b4236342`), including `garage web`, a read-only loopback dashboard started on demand, and Cursor as a CLI-managed user-scope skill target. The snapshot is pinned independently of the CLI release listed in `release.json`. Agent orchestration, AI-provider connections, plugins, libraries, adapters, and SDKs are not implemented in this snapshot.
 
 ## CLI releases
 
-The homepage quick start, Getting Started, CLI Library entry, and macOS and Linux download sections show `npm install -g @buildergarage/garage` for Node.js 20 or later. Windows users can still download a ZIP archive from the Downloads page.
+The homepage quick start, Getting Started, CLI Library entry, and macOS and Linux download sections show `npm install -g @buildergarage/garage` for Node.js 20 or later. The Downloads page also links to signed macOS `.pkg` installers and Windows ZIP archives.
 
-The download page reads `release.json`, a checked-in manifest of the latest stable CLI release, its tagged commit, and GitHub asset URLs. Run `node scripts/update-release.mjs` to refresh it from the GitHub API; use `GITHUB_TOKEN` if unauthenticated API limits are a concern. The updater refuses missing archives, checksum/signature assets, incomplete package sets, or invalid asset URLs rather than publishing partial downloads. The manifest does not update the separate `framework-source.json` pin. Check the linked release notes for macOS signing and notarization status; the manifest does not infer signing.
+The download page reads `release.json`, a checked-in manifest of the latest stable CLI release, its tagged commit, and GitHub asset URLs. Run `node scripts/update-release.mjs` to refresh it from the GitHub API; use `GITHUB_TOKEN` if unauthenticated API limits are a concern. The updater refuses missing archives, checksum/signature assets, incomplete Linux or macOS package pairs, or invalid asset URLs rather than publishing partial downloads. The manifest does not update the separate `framework-source.json` pin. Check the linked release notes for macOS signing and notarization status; the manifest does not infer signing.
 
 The download page presents operating systems as selectable controls, defaulting to a detected desktop OS when possible. All downloads remain visible when the OS is unknown or JavaScript is unavailable.
 
@@ -43,7 +43,7 @@ Edit `site.css` for the sectioned stylesheet, `site.js` for interactions, and `s
 
 Brand images and self-hosted Latin-subset Archivo, Inter, and JetBrains Mono fonts live in `assets/` and are copied into each build. Font faces use `font-display: swap`; the display and body faces used above the fold are preloaded. Font licenses are included in `assets/fonts/OFL-*.txt`. No external font service or temporary handoff directory is required.
 
-The homepage leads with a prominent centered logo above the headline and copyable source-build snippet, followed by a five-step workflow. Open shop-floor columns and ruled adoption paths lead to CLI, Skills, and Manuals category links that open the corresponding Library filter.
+The homepage leads with a prominent centered logo above the headline and copyable npm-install snippet, followed by a five-step workflow. Open shop-floor columns and ruled adoption paths lead to CLI, Skills, and Manuals category links that open the corresponding Library filter. How it Works explains the on-demand local dashboard with a redacted screenshot.
 
 Page and section headings establish hierarchy without eyebrow labels. Workflow step numbers, status badges, and artifact tags remain functional UI.
 
@@ -55,7 +55,7 @@ The footer links to a website privacy policy generated in `scripts/build.mjs`. R
 
 Learn guides use a 1200px article shell with prose capped at 75ch. Tables and code can use the full inner width; tables use 16px text and keyboard-focusable horizontal scrolling when needed. Mobile guides retain 16px gutters.
 
-Keep build provenance out of the main reading flow: Updates holds the framework version and revision, linked as "Source details" from every footer. Artifact revisions and skill file inventories live in collapsed technical details; roles, provisional status, and installation requirements stay visible. Guide headers link to their pinned source without repeating repository paths or revisions. The source-build guide notes its snapshot and links to current downloads. The generator corrects stale release wording and omits Windows signing discussion from the rendered guide. Review those edits when updating the snapshot.
+Keep build provenance out of the main reading flow: Updates holds the framework version and revision, linked as "Source details" from every footer. Artifact revisions and skill file inventories live in collapsed technical details; roles, provisional status, and installation requirements stay visible. Guide headers link to their pinned source without repeating repository paths or revisions. The source-build guide notes its snapshot and links to current downloads. The generator corrects stale release wording and removes deferred platform-signing copy from the rendered guide. Review those edits when updating the snapshot.
 
 ## Publish
 

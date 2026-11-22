@@ -14,17 +14,26 @@ export function validateRelease(release) {
     `garage_${version}_checksums.txt`,
     `garage_${version}_checksums.txt.sigstore.json`
   ];
-  const optional = [
-    ...['amd64', 'arm64'].map(arch => `garage_${version}_linux_${arch}.deb`),
-    ...['x86_64', 'aarch64'].map(arch => `garage-${version}-1.${arch}.rpm`)
+  const optionalGroups = [
+    ['Linux', [
+      ...['amd64', 'arm64'].map(arch => `garage_${version}_linux_${arch}.deb`),
+      ...['x86_64', 'aarch64'].map(arch => `garage-${version}-1.${arch}.rpm`)
+    ]],
+    ['macOS', ['amd64', 'arm64'].map(arch => `garage_${version}_darwin_${arch}.pkg`)]
   ];
   if (!Array.isArray(release.assets) || new Set(release.assets.map(a => a.name)).size !== release.assets.length) {
     throw new Error('Release assets must be a unique list.');
   }
   const available = new Map(release.assets.map(asset => [asset.name, asset.url]));
   for (const name of required) if (!available.has(name)) throw new Error(`Missing release asset: ${name}`);
-  const packages = optional.filter(name => available.has(name));
-  if (packages.length !== 0 && packages.length !== optional.length) throw new Error('Linux package assets are incomplete.');
+  const packages = [];
+  for (const [platform, group] of optionalGroups) {
+    const present = group.filter(name => available.has(name));
+    if (present.length !== 0 && present.length !== group.length) {
+      throw new Error(`${platform} package assets are incomplete.`);
+    }
+    packages.push(...present);
+  }
   const names = [...required, ...packages];
   if (release.assets.length !== names.length) throw new Error('Release manifest contains unexpected assets.');
   for (const name of names) {
@@ -55,6 +64,7 @@ export async function fetchLatestRelease(fetcher = fetch, token = process.env.GI
   const version = latest.tag_name.slice(1);
   const supported = new Set([
     ...['darwin', 'linux'].flatMap(os => ['amd64', 'arm64'].map(arch => `garage_${version}_${os}_${arch}.tar.gz`)),
+    ...['amd64', 'arm64'].map(arch => `garage_${version}_darwin_${arch}.pkg`),
     ...['amd64', 'arm64'].map(arch => `garage_${version}_windows_${arch}.zip`),
     ...['amd64', 'arm64'].map(arch => `garage_${version}_linux_${arch}.deb`),
     ...['x86_64', 'aarch64'].map(arch => `garage-${version}-1.${arch}.rpm`),

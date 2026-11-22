@@ -16,7 +16,8 @@ const release = loadRelease(resolve(root, 'release.json'));
 const releaseVersion = release.version;
 const releaseUrl = `${repo}/releases/tag/${releaseVersion}`;
 const releaseVerification = `${repo}/blob/${releaseVersion}/docs/release-verification.md`;
-const macTrust = `Starting with <a href="${repo}/releases/tag/v0.4.0">v0.4.0</a>, macOS executables are Developer ID signed and Apple-notarized. See <a href="${releaseVerification}#macos-signature-and-notarization">how Gatekeeper verifies the signature and notarization</a>.`;
+const hasMacPackages = release.assets.some(asset => asset.name.endsWith('.pkg'));
+const macTrust = `Starting with <a href="${repo}/releases/tag/v0.4.0">v0.4.0</a>, macOS executables are Developer ID signed and Apple-notarized.${hasMacPackages ? ' The macOS installer packages in this release are also signed, notarized, and stapled.' : ''} See <a href="${releaseVerification}#macos-signature-and-notarization">how Gatekeeper verifies the signature and notarization</a>.`;
 const releaseInfo = `<p><a href="/download/">Download garage ${releaseVersion}</a> for macOS, Linux, or Windows on amd64 and arm64. Prebuilt executables do not require Go.</p>
   <p>Verify the signed checksum manifest and your archive's checksum before running it; GitHub artifact attestations are also available. Follow <a href="${releaseVerification}">release verification and terminal extraction instructions ↗</a>.</p>
   <p class="callout">${macTrust}</p>`;
@@ -39,7 +40,7 @@ const manuals = existsSync(resolve(source, 'manuals')) ? readdirSync(resolve(sou
   const path = `manuals/${file}`, [meta] = frontmatter(text(path)); const name = meta.name || basename(file, '.md');
   return { type: 'manuals', name, alias: `manual v${meta.version || '0.1'}`, role: meta.status || 'provisional', summary: meta.description || `${name} engineering manual.`, description: meta.description || `${name} engineering manual.`, path, url: `/library/manuals/${name}/`, sourceUrl: `${repo}/blob/${sha}/${path}`, manual: true };
 }) : [];
-const cli = { type: 'cli', name: 'garage', alias: 'CLI', role: 'foundation', summary: 'A CLI for project configuration, private local workflow history, skill and manual installation, read-only GitHub workflow status, and on-demand release checks.', description: 'The CLI initializes, upgrades, validates, shows, and changes project configuration; records and reads private local workflow events; installs and verifies canonical skills and adopted manuals; reads issue and pull-request workflow status through gh; and checks for newer releases only when asked. It does not install updates, execute workflows, configure agents, connect AI providers, load plugins, or provide remote services.', path: 'cmd/garage/main.go', url: '/library/cli/garage/', sourceUrl: `${repo}/blob/${sha}/cmd/garage/main.go` };
+const cli = { type: 'cli', name: 'garage', alias: 'CLI', role: 'foundation', summary: 'A CLI for project configuration, private local workflow history, skill and manual installation, read-only GitHub workflow status and dashboard, and on-demand release checks.', description: 'The CLI initializes, upgrades, validates, shows, and changes project configuration; records and reads private local workflow events; installs and verifies canonical skills and adopted manuals; reads issue and pull-request workflow status through gh; serves a read-only local dashboard on demand; and checks for newer releases only when asked. It does not install updates, execute workflows, configure agents, connect AI providers, load plugins, or provide remote services.', path: 'cmd/garage/main.go', url: '/library/cli/garage/', sourceUrl: `${repo}/blob/${sha}/cmd/garage/main.go` };
 const artifacts = [cli, ...skills, ...manuals];
 const artifactLabel = a => ({ skills: 'Skill', manuals: 'Manual', cli: 'CLI' })[a.type];
 const roles = [...new Set(skills.map(a => a.role))];
@@ -176,7 +177,7 @@ function artifactDetail(a, depth = '') {
       <section id="cli-panel" role="tabpanel" hidden>
         <p>From a project with valid configuration and declared skill targets, install and verify the complete embedded canonical skill set, together with the manuals the project adopts:</p>
         ${code('garage config validate\ngarage skills install\ngarage skills verify')}
-        <p>The CLI supports user-scope targets for Claude Code, Codex, and Copilot CLI, not individual-skill or project-scope installs. Harness path behavior was confirmed on macOS; Linux and Windows harness behavior remains unconfirmed. Existing unmanaged or modified copies require explicit replacement consent and a backup. See <a href="${depth}learn/skill-installation/">skill installation</a>.</p>
+        <p>The CLI supports user-scope targets for Claude Code, Codex, Copilot CLI, and Cursor, not individual-skill or project-scope installs. Cursor uses <code>~/.cursor/skills</code> and has no path override. Harness path behavior was confirmed on macOS; Linux and Windows harness behavior remains unconfirmed. Existing unmanaged or modified copies require explicit replacement consent and a backup. See <a href="${depth}learn/skill-installation/">skill installation</a>.</p>
       </section>
     </div>`;
   } else if (isManual) {
@@ -238,8 +239,9 @@ write('download', layout({
         <div class="download-links">${downloadLink(`garage_${releaseNumber}_windows_amd64.zip`, 'Windows · x64 (.zip)')}${downloadLink(`garage_${releaseNumber}_windows_arm64.zip`, 'Windows · ARM64 (.zip)')}</div>
       </section>
       <section class="download-platform" data-platform="macos"><h2>macOS</h2>
-        <div class="download-links">${downloadLink(`garage_${releaseNumber}_darwin_arm64.tar.gz`, 'macOS · Apple silicon (.tar.gz)')}${downloadLink(`garage_${releaseNumber}_darwin_amd64.tar.gz`, 'macOS · Intel (.tar.gz)')}</div>
+        <div class="download-links">${downloadLink(`garage_${releaseNumber}_darwin_arm64.pkg`, 'macOS · Apple silicon (.pkg)')}${downloadLink(`garage_${releaseNumber}_darwin_amd64.pkg`, 'macOS · Intel (.pkg)')}${downloadLink(`garage_${releaseNumber}_darwin_arm64.tar.gz`, 'macOS · Apple silicon (.tar.gz)')}${downloadLink(`garage_${releaseNumber}_darwin_amd64.tar.gz`, 'macOS · Intel (.tar.gz)')}</div>
         <p>${macTrust}</p>
+        ${hasMacPackages ? '<p>The signed installer places <code>garage</code> in <code>/usr/local/bin</code> and its versioned files in <code>/usr/local/lib/buildergarage</code>. Use the installer’s uninstall helper before switching to another installation method.</p>' : ''}
         ${npmInstall}
       </section>
       <section class="download-platform" data-platform="linux"><h2>Linux</h2>
@@ -260,6 +262,7 @@ const harness = `<table><thead><tr><th>Harness</th><th>CLI-managed user director
   <tr><th>Claude Code</th><td><code>~/.claude/skills</code></td></tr>
   <tr><th>Codex</th><td><code>~/.codex/skills</code></td></tr>
   <tr><th>Copilot CLI</th><td><code>~/.copilot/skills</code></td></tr>
+  <tr><th>Cursor</th><td><code>~/.cursor/skills</code></td></tr>
 </tbody></table>`;
 write('get-started', layout({
   title: 'Get started', description: 'Choose a Builder Garage adoption path.', current: 'get-started/', depth: '../',
@@ -269,7 +272,7 @@ write('get-started', layout({
         <article id="framework"><span class="tag">PATH A</span><h2>Use the framework</h2>
           <h3>Install with npm</h3>${npmInstall}
           <h3>Download a prebuilt CLI</h3>${releaseInfo}
-          <p>On macOS and Linux, you can also <a href="../learn/build-from-source/#install-a-release">install a verified release with <code>install.sh</code></a>. Linux also offers <code>.deb</code>, <code>.rpm</code>, and a Homebrew cask.</p>
+          <p>On macOS and Linux, you can also <a href="../learn/build-from-source/#install-a-release">install a verified release with <code>install.sh</code></a>. macOS also offers signed <code>.pkg</code> installers; Linux offers <code>.deb</code>, <code>.rpm</code>, and a Homebrew cask.</p>
           <h3>Or build from source</h3><p>Install the CLI from the verified source revision:</p>${code(sourceInstall, 'macOS and Linux')}
           <p>${esc(installRequirements)} If <code>~/.local/bin</code> is not on PATH, follow the installer's instructions before continuing.</p>
           <p><a href="../learn/build-from-source/#build-by-hand">Windows and manual builds →</a></p>
@@ -281,15 +284,15 @@ write('get-started', layout({
         <article id="artifacts"><span class="tag">PATH B</span><h2>Use individual artifacts</h2>
           <p>Download a skill ZIP or manual Markdown file from the Library. Preserve each skill's directory structure and follow your harness's skill-location rules.</p>
           ${harness}
-          <p>These are the CLI's default user-scope paths. It also honors <code>CLAUDE_CONFIG_DIR</code>, <code>CODEX_HOME</code>, and <code>COPILOT_HOME</code>. Project-scope installs are not supported by the CLI. Harness path behavior was confirmed on macOS; Linux and Windows harness behavior remains unconfirmed.</p>
+          <p>These are the CLI's default user-scope paths. It also honors <code>CLAUDE_CONFIG_DIR</code>, <code>CODEX_HOME</code>, and <code>COPILOT_HOME</code>; Cursor uses its default path without an override. Project-scope installs are not supported by the CLI. Harness path behavior was confirmed on macOS; Linux and Windows harness behavior remains unconfirmed.</p>
           <p><a class="button" href="../library/">Browse the Library</a></p>
           <p class="callout">Hand-placed skills are unmanaged, not standalone executables. Canonical skills use <code>garage config validate</code> when resolving project choices, so those steps still require the CLI on PATH and valid configuration. Manuals apply only when the project adopts them. Read <a href="../learn/configuration/#how-the-skills-read-the-configuration">the configuration contract</a> before use.</p>
         </article>
       </div>
       <h2 id="what-exists-today">What exists today</h2>
       <div class="comparison">
-        <p><b>Available:</b> <a href="../download/">prebuilt CLI archives for macOS, Linux, and Windows</a> on amd64 and arm64; source builds; ${skills.length} reusable engineering skills; ${manuals.length} technology manuals (${[...new Set(manuals.map(a => a.role))].map(esc).join(', ')}); the operating model, review contract, governance, and contribution guides.</p>
-        <p><b>The CLI:</b> manages project configuration; records and reads private local workflow history; installs and verifies canonical skills and adopted manuals; reads issue and pull-request workflow status through authenticated <code>gh</code>; and reports its version. <code>garage update check</code> checks for newer releases on demand without installing them.</p>
+        <p><b>Available:</b> <a href="../download/">prebuilt CLI archives for macOS, Linux, and Windows</a> on amd64 and arm64, plus signed macOS <code>.pkg</code> installers; npm and source installs; ${skills.length} reusable engineering skills; ${manuals.length} technology manuals (${[...new Set(manuals.map(a => a.role))].map(esc).join(', ')}); the operating model, review contract, governance, and contribution guides.</p>
+        <p><b>The CLI:</b> manages project configuration; records and reads private local workflow history; installs and verifies canonical skills and adopted manuals; reads issue and pull-request workflow status through authenticated <code>gh</code>; serves a read-only local dashboard when <code>garage web</code> is explicitly run; and reports its version. <code>garage update check</code> checks for newer releases on demand without installing them.</p>
         <p><b>Not implemented:</b> workflow execution or agent orchestration, agent configuration, AI-provider connections, plugin loading, remote services, libraries, adapters, or SDKs.</p>
       </div>
     </section>`
@@ -316,6 +319,12 @@ write('how-it-works', layout({
       <p><a href="../learn/gate-map/">See the complete gate map →</a></p>
       <h2>Current CLI capabilities</h2><p>${esc(cli.description)}</p>
       <p>Local workflow history is a private annotation, not review evidence. GitHub issue and PR records are authoritative. <code>garage status</code> makes one read through authenticated <code>gh</code> and may make a follow-up read for governing issues, including for pull requests off the default branch. It never polls, assigns agents, or advances work.</p>
+      <h2>A local, read-only dashboard</h2>
+      <p>Run <code>garage web</code> when you want a browser view of one configured project. It binds to IPv4 loopback, displays project configuration, skill verification, recorded activity, and workflow status, and requires the separate access code it prints. It is read-only, writes no project data, does not advance workflow, and is not a background service. <code>garage web --open</code> opens the dashboard with a one-time bootstrap.</p>
+      <figure class="web-dashboard-figure">
+        <img src="../assets/garage-web-dashboard.png" alt="Builder Garage local read-only dashboard showing project configuration, skill status, workflow status, and recorded activity. The local directory path is blurred." loading="lazy">
+        <figcaption>The dashboard presents recorded project information locally; GitHub records remain authoritative.</figcaption>
+      </figure>
     </section>`
 }));
 write('learn', layout({
@@ -335,6 +344,12 @@ for (const [guideSlug, guideTitle, guidePath] of guideFiles) {
       .replace(/^- \*\*Windows:\*\* a PowerShell installer follows platform signing.*$/m, '- **Windows:** download and verify a release as [Verifying a release](docs/release-verification.md#windows-powershell) shows.')
       .replace(/^- Windows executables are not yet Authenticode-signed.*\r?\n/m, '')
       .replace(/ macOS `\.pkg` and Windows `\.msi` installers,.*They wait for platform signing\./, '');
+  }
+  if (guidePath === 'docs/skill-installation.md') {
+    markdown = markdown.replace(
+      /Only user scope is supported\. Project-scope installs, and harnesses other than the three confirmed ones, are not\./,
+      'Only user-scope installs are supported. The four managed targets are Claude Code, Codex, Copilot CLI, and Cursor; project-scope installs are not supported.'
+    );
   }
   const body = renderMarkdown(markdown, { source, repo, sha, path: guidePath });
   write(`learn/${guideSlug}`, layout({

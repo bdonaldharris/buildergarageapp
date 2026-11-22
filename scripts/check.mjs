@@ -9,7 +9,7 @@ const dist = resolve('dist');
 const vercel = JSON.parse(readFileSync(resolve('vercel.json'), 'utf8'));
 assert.ok(vercel.redirects.some(rule => rule.source === '/index.html' && rule.destination === '/' && rule.permanent === true), 'Legacy homepage URL permanently redirects to root');
 const { source, repo, sha } = await frameworkSource(resolve('.'));
-const required = ['index.html', 'download/index.html', 'privacy/index.html', 'library/index.html', 'get-started/index.html', '404.html', 'rss.xml', 'site.css', 'site.js', 'source.json'];
+const required = ['index.html', 'download/index.html', 'privacy/index.html', 'library/index.html', 'get-started/index.html', 'how-it-works/index.html', 'assets/garage-web-dashboard.png', '404.html', 'rss.xml', 'site.css', 'site.js', 'source.json'];
 for (const file of required) if (!existsSync(resolve(dist, file))) throw new Error(`Missing build output: ${file}`);
 const library = readFileSync(resolve(dist, 'library/index.html'), 'utf8');
 if (!library.includes('aria-live') || !library.includes('Search the library')) throw new Error('Library accessibility controls missing');
@@ -82,6 +82,7 @@ assert.ok(!library.includes('Generated from Builder Garage') && !library.include
 assert.doesNotMatch(library, /class="(?:artifact|detail-panel|detail-placeholder)\b|class="resource-row selected"/, 'The Library has no inline details or preselected resource');
 const gettingStarted = readFileSync(resolve(dist, 'get-started/index.html'), 'utf8');
 assert.ok(!gettingStarted.includes('Verified against'));
+assert.ok(gettingStarted.includes('~/.cursor/skills') && gettingStarted.includes('Cursor uses its default path'), 'Getting Started documents the Cursor target and path behavior');
 const learn = readFileSync(resolve(dist, 'learn/index.html'), 'utf8');
 assert.ok(!learn.includes('<small>'), 'Guide listings omit repository paths and redundant labels');
 for (const guide of catalog.guides) {
@@ -98,6 +99,11 @@ for (const [label, html] of [['Home', home], ['Getting Started', gettingStarted]
   assert.ok(html.includes('<pre>npm install -g @buildergarage/garage</pre>') && html.includes('Node.js 20 or later'), `Copyable npm install guidance is present on ${label}`);
 }
 assert.ok(gettingStarted.includes(`git checkout ${sha}`) && cliDetail.includes(`git checkout ${sha}`), 'Source build commands retain the exact revision');
+const howItWorks = readFileSync(resolve(dist, 'how-it-works/index.html'), 'utf8');
+assert.ok(howItWorks.includes('garage web') && howItWorks.includes('IPv4 loopback') && howItWorks.includes('one-time bootstrap'), 'Dashboard documentation describes its start and access boundaries');
+assert.ok(howItWorks.includes('assets/garage-web-dashboard.png') && howItWorks.includes('directory path is blurred'), 'Dashboard page includes the redacted visual with descriptive alt text');
+const skillGuide = readFileSync(resolve(dist, 'learn/skill-installation/index.html'), 'utf8');
+assert.ok(skillGuide.includes('Claude Code, Codex, Copilot CLI, and Cursor') && !skillGuide.includes('three confirmed'), 'Skill guide lists the four managed targets');
 const release = loadRelease();
 const releaseUrl = `${repo}/releases/tag/${release.version}`;
 for (const page of ['download/index.html', 'learn/build-from-source/index.html']) {
@@ -117,6 +123,10 @@ for (const os of ['windows', 'macos', 'linux']) {
   assert.equal(platform.includes('npm install -g @buildergarage/garage'), os !== 'windows', `npm install guidance matches supported platforms: ${os}`);
 }
 for (const asset of release.assets) assert.ok(download.includes(`href="${asset.url}"`), `Download page links to ${asset.name}`);
+if (release.assets.some(asset => asset.name.endsWith('.pkg'))) {
+  assert.ok(download.includes('/usr/local/bin') && download.includes('/usr/local/lib/buildergarage'), 'macOS package install paths are disclosed');
+  assert.ok(download.includes('uninstall helper before switching'), 'macOS package uninstall guidance is visible');
+}
 assert.ok(download.includes(`${repo}/commit/${release.revision}`) && download.includes(`${repo}/commit/${sha}`), 'Release and source provenance are shown');
 
 const fontStylesheet = resolve(dist, 'assets/fonts/fonts.css');

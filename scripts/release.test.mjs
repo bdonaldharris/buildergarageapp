@@ -7,6 +7,7 @@ const names = [
   ...['amd64', 'arm64'].map(arch => `garage_1.2.3_windows_${arch}.zip`),
   ...['amd64', 'arm64'].map(arch => `garage_1.2.3_linux_${arch}.deb`),
   ...['x86_64', 'aarch64'].map(arch => `garage-1.2.3-1.${arch}.rpm`),
+  ...['amd64', 'arm64'].map(arch => `garage_1.2.3_darwin_${arch}.pkg`),
   'garage_1.2.3_checksums.txt',
   'garage_1.2.3_checksums.txt.sigstore.json'
 ].sort((a, b) => a.localeCompare(b, 'en'));
@@ -23,12 +24,28 @@ test('release manifest rejects missing, partial, duplicated, and incorrect asset
   const partial = structuredClone(release);
   partial.assets = partial.assets.filter(asset => !asset.name.endsWith('linux_arm64.deb'));
   assert.throws(() => validateRelease(partial), /package assets are incomplete/);
+  const partialMac = structuredClone(release);
+  partialMac.assets = partialMac.assets.filter(asset => !asset.name.endsWith('darwin_arm64.pkg'));
+  assert.throws(() => validateRelease(partialMac), /macOS package assets are incomplete/);
   const duplicate = structuredClone(release);
   duplicate.assets.push(duplicate.assets[0]);
   assert.throws(() => validateRelease(duplicate), /unique list/);
   const invalid = structuredClone(release);
   invalid.assets[0].url = 'https://example.com/file';
   assert.throws(() => validateRelease(invalid), /Invalid release asset URL/);
+});
+
+test('accepts stable releases published before macOS installer packages', () => {
+  const earlierRelease = structuredClone(release);
+  earlierRelease.version = 'v0.4.0';
+  earlierRelease.assets = earlierRelease.assets
+    .filter(asset => !asset.name.endsWith('.pkg'))
+    .map(asset => ({
+      ...asset,
+      name: asset.name.replaceAll('1.2.3', '0.4.0'),
+      url: asset.url.replaceAll('v1.2.3', 'v0.4.0').replaceAll('1.2.3', '0.4.0')
+    }));
+  assert.equal(validateRelease(earlierRelease).assets.length, names.length - 2);
 });
 
 test('fetches published release and resolves its tag to a commit', async () => {
